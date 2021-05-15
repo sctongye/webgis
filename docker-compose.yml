@@ -1,0 +1,41 @@
+version: '3'
+
+services:
+  # Vue.js
+  frontend:
+    container_name: frontend
+    build: ./frontend
+    ports:
+      - 8080:8080
+    privileged: true
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    tty: true
+    stdin_open: true
+    command: /bin/sh -c "npm run serve"
+
+  # PostGIS
+  db:
+    container_name: db
+    image: postgis/postgis
+    environment:
+      - POSTGRES_DB=postgis
+      - POSTGRES_USER=pguser
+      - POSTGRES_PASSWORD=pgpass
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+ 
+  # Django REST Framework
+  backend:
+    container_name: backend
+    build: .
+    command: python3 manage.py runserver 0.0.0.0:8000
+    volumes:
+      - .:/app
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+volumes:
+  postgres_data:
