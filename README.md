@@ -1,7 +1,7 @@
 # webgis
 
 ### 環境
-Docker Desktop  
+Docker Desktop (for Mac ver 3.2.2)
 
 ### インストールコマンド
 $ docker-compose up -d  
