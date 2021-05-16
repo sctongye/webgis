@@ -2,5 +2,13 @@ import { createApp } from 'vue'
 import App from './App.vue'
 import router from './router'
 import store from './store'
+import jQuery from 'jquery' //added
 
-createApp(App).use(store).use(router).mount('#app')
+import "bootstrap"; //added
+import "bootstrap/dist/css/bootstrap.min.css"; //added
+
+const app = createApp(App)
+app.use(store)
+app.use(router)
+app.use(jQuery)
+app.mount('#app')

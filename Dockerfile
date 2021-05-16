@@ -1,16 +1,3 @@
-# # Python3のイメージを基にする
-# FROM python:3
-# ENV PYTHONUNBUFFERED 1
-# # ビルド時に/appというディレクトリを作成する
-# RUN mkdir /code
-# # ワークディレクトリの設定
-# WORKDIR /app
-# # requirements.txtを/app/にコピーする
-# ADD requirements.txt /app/
-# # requirements.txtを基にpip installする
-# RUN pip install -r requirements.txt
-# ADD . /app/
-
 # pull official base image
 FROM python:3.8.6-alpine
 
