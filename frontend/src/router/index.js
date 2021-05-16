@@ -1,17 +1,12 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import Home from '../views/Home.vue'
-import GeoMap from '../views/GeoMap.vue'
+import HomeMap from '../views/HomeMap.vue'
 
 const routes = [
+
   {
     path: '/',
-    name: 'Home',
-    component: Home
-  },
-  {
-    path: '/map',
-    name: 'Map',
-    component: GeoMap
+    name: 'HomeMap',
+    component: HomeMap
   }
 ]
 
