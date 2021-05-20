@@ -1,5 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import HomeMap from '../views/HomeMap.vue'
+import FieldInfo from '../views/FieldInfo.vue'
 
 const routes = [
 
@@ -7,6 +8,11 @@ const routes = [
     path: '/',
     name: 'HomeMap',
     component: HomeMap
+  },
+  {
+    path: '/fieldinfo',
+    name: 'FieldInfo',
+    component: FieldInfo
   }
 ]
 

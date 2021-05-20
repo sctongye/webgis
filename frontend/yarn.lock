@@ -1930,6 +1930,13 @@
   "resolved" "https://registry.npm.taobao.org/aws4/download/aws4-1.11.0.tgz"
   "version" "1.11.0"
 
+"axios@^0.21.1", "axios@>= 0.20.0":
+  "integrity" "sha512-dKQiRHxGD9PPRIUNIWvZhPTPpl1rf/OxTYKsqKUDjBwYylTvV7SjSHJb9ratfyzM6wCdLCOYLzs73qpg5c4iGA=="
+  "resolved" "https://registry.npmjs.org/axios/-/axios-0.21.1.tgz"
+  "version" "0.21.1"
+  dependencies:
+    "follow-redirects" "^1.10.0"
+
 "babel-eslint@^10.1.0":
   "integrity" "sha1-aWjlaKkQt4+zd5zdi2rC9HmUMjI="
   "resolved" "https://registry.npm.taobao.org/babel-eslint/download/babel-eslint-10.1.0.tgz"
@@ -4030,7 +4037,7 @@
     "inherits" "^2.0.3"
     "readable-stream" "^2.3.6"
 
-"follow-redirects@^1.0.0":
+"follow-redirects@^1.0.0", "follow-redirects@^1.10.0":
   "integrity" "sha512-HWqDgT7ZEkqRzBvc2s64vSZ/hfOceEol3ac/7tKwzuvEyWx3/4UegXh5oBOIotkGsObyk3xznnSRVADBgWSQVg=="
   "resolved" "https://registry.npmjs.org/follow-redirects/-/follow-redirects-1.14.1.tgz"
   "version" "1.14.1"
@@ -8362,6 +8369,11 @@
   "resolved" "https://registry.npm.taobao.org/vm-browserify/download/vm-browserify-1.1.2.tgz"
   "version" "1.1.2"
 
+"vue-axios@^3.2.4":
+  "integrity" "sha512-8Dgws6dwt+1LoKEU4HDzIPfaRgWHl0xLDLW6kxrAk/z3GAJ2thkajcXC4qZgmqj0cZRx/Z/dzooKi5HWtUQwxA=="
+  "resolved" "https://registry.npmjs.org/vue-axios/-/vue-axios-3.2.4.tgz"
+  "version" "3.2.4"
+
 "vue-eslint-parser@^7.6.0":
   "integrity" "sha1-AeoaKTL1gf8kQzZWXXEoAfj3JWE="
   "resolved" "https://registry.npm.taobao.org/vue-eslint-parser/download/vue-eslint-parser-7.6.0.tgz?cache=0&sync_timestamp=1614679716186&other_urls=https%3A%2F%2Fregistry.npm.taobao.org%2Fvue-eslint-parser%2Fdownload%2Fvue-eslint-parser-7.6.0.tgz"
@@ -8419,7 +8431,7 @@
   "resolved" "https://registry.npm.taobao.org/vue-template-es2015-compiler/download/vue-template-es2015-compiler-1.9.1.tgz"
   "version" "1.9.1"
 
-"vue@^2 || ^3.0.0-0", "vue@^3.0.0", "vue@^3.0.11", "vue@^3.0.2", "vue@3.0.11":
+"vue@^ 3.0.0 || ^ 2.0.0", "vue@^2 || ^3.0.0-0", "vue@^3.0.0", "vue@^3.0.11", "vue@^3.0.2", "vue@3.0.11":
   "integrity" "sha512-3/eUi4InQz8MPzruHYSTQPxtM3LdZ1/S/BvaU021zBnZi0laRUyH6pfuE4wtUeLvI8wmUNwj5wrZFvbHUXL9dw=="
   "resolved" "https://registry.npmjs.org/vue/-/vue-3.0.11.tgz"
   "version" "3.0.11"
