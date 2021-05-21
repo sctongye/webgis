@@ -7,11 +7,6 @@ import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
 
 export default {
-  data() {
-    return {
-      geojson: null,
-    }
-  },
   mounted() {
     // 地図表示中央
     const latlng = L.latLng( 43.2121696, 143.2725181 )
@@ -33,6 +28,16 @@ export default {
     L.control.layers(baseMaps, null,{collapsed: false}).addTo(mymap);
     L.control.scale({imperial: false,maxWidth: 300}).addTo(mymap);
 
+    // backendからポリゴンデータを取得し表示
+    this.axios
+        .get("/api/v1/polygondata/")
+        .then(response => (
+            this.polygonControl(response.data,mymap)
+      ));    
+  },
+  methods: {
+    polygonControl(geojson,mymap){
+
     // マウスオーバー
     function onEachFeature(feature, layer) {
       layer.on({
@@ -45,7 +50,7 @@ export default {
         var layer = e.target;
         layer.setStyle({
             weight: 5,
-            color: '#666',
+            color: '#ff0000',
             dashArray: '',
             fillOpacity: 0.7
         });
@@ -56,7 +61,7 @@ export default {
     }
 
     function resetHighlight(e) {
-        this.geojson.resetStyle(e.target);
+        geoJSON.resetStyle(e.target);
         info.update();
     }
 
@@ -68,66 +73,29 @@ export default {
         return this._div;
     };
     info.update = function (props) {
-        this._div.innerHTML = '<h4>US Population Density</h4>' +  (props ?
-            '<b>' + props.year + '</b><br />' + props.remarks + ' people / mi<sup>2</sup>'
-            : 'Hover over a state');
+        this._div.innerHTML = (props ? '<b>' + props.year + '</b><br />' + props.remarks : 'Field Info');
     };
     info.addTo(mymap);
 
-
-    // var geojson = L.geoJson(statesData, {
-    //     onEachFeature: onEachFeature,
-    // }).addTo(mymap);
-
-    // backendからポリゴンデータを取得し表示
-    this.axios
-        .get("/api/v1/polygondata/")
-        .then(response => (
-            this.geojson = this.onPolygon(response.data,onEachFeature,mymap)
-            // this.geojson = L.geoJSON(response.data).addTo(mymap)
-      ));
-    
-  },
-  methods: {
-    onPolygon(geojson,onEachFeature,mymap){
-      L.geoJSON(geojson,{ onEachFeature: onEachFeature}).addTo(mymap)
-
-
-
-      
+    var geoJSON = L.geoJSON(geojson,{ onEachFeature: onEachFeature}).addTo(mymap)
     }
-    // onEachFeature(feature, layer) {
-    //   layer.on({
-    //       mouseover: highlightFeature,
-    //       mouseout: resetHighlight,
-    //   });
-    // },
-    // highlightFeature(e) {
-    //     var layer = e.target;
-    //     layer.setStyle({
-    //         weight: 5,
-    //         color: '#666',
-    //         dashArray: '',
-    //         fillOpacity: 0.7
-    //     });
-    //     if (!L.Browser.ie && !L.Browser.opera && !L.Browser.edge) {
-    //         layer.bringToFront();
-    //     }
-    //     info.update(layer.feature.properties);
-    // },
-    // resetHighlight(geojson,e) {
-    //     geojson.resetStyle(e.target);
-    //     info.update();
-    // }
   },
 
 }
 
 </script>
 
-<style scoped>
+<style>
 #map {
   width: 100%;
   height: 100vh;
+}
+.info {
+  font-size: 16px;
+  width: 120px;
+  height: 60px;
+  background: white;
+  border-radius: 5px;
+  opacity: 0.7;
 }
 </style>
