@@ -5,6 +5,7 @@ from .serializers import PolygonDataSerializer,OwnerDataSerializer,CropCodeSeria
 class PolygonDataViewSet(viewsets.ModelViewSet):
 
     queryset = PolygonData.objects.all()
+    # queryset = PolygonData.objects.filter(crop_id__crop_name='大豆')
     serializer_class = PolygonDataSerializer
 
 class OwnerDataViewSet(viewsets.ModelViewSet):
