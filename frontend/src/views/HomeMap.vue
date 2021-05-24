@@ -45,7 +45,13 @@ export default {
       layer.on({
           mouseover: highlightFeature,
           mouseout: resetHighlight,
+          click: moveGeoInfo
       });
+    }
+
+    // ポリゴンクリックで遷移
+    function moveGeoInfo() {
+      window.location.href ="http://127.0.0.1:8000/fieldinfo"
     }
 
     function highlightFeature(e) {
