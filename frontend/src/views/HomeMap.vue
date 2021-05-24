@@ -1,5 +1,5 @@
 <template>
-  <div id="map"></div>
+  <div id="mainmap"></div>
 </template>
 
 <script>
@@ -22,7 +22,7 @@ export default {
 
 
     // 地図表示
-    var mymap = L.map( 'map', { center: latlng, zoom: 15,layers: [o_std] } )
+    var mymap = L.map( 'mainmap', { center: latlng, zoom: 15,layers: [o_std] } )
     
     // 地図補足表示
     const baseMaps = {'OSM': o_std,'地理院': t_ort};
@@ -80,6 +80,7 @@ export default {
     info.addTo(mymap);
 
     var geoJSON = L.geoJSON(geojson,{ onEachFeature: onEachFeature}).addTo(mymap)
+
     }
   },
 
@@ -88,7 +89,7 @@ export default {
 </script>
 
 <style scoped>
-#map {
+#mainmap {
   width: 100%;
   height: 100vh;
 }

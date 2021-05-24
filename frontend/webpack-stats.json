@@ -1,1 +1,1 @@
-{"status":"done","publicPath":"http://127.0.0.1:8080/","chunks":{"app":[{"name":"bundle.js","publicPath":"http://127.0.0.1:8080/bundle.js","path":"/app/dist/bundle.js"}]}}
+{"status":"done","publicPath":"http://127.0.0.1:8080/","chunks":{"app":[{"name":"bundle.js","publicPath":"http://127.0.0.1:8080/bundle.js","path":"/app/dist/bundle.js"},{"name":"app.97542b8e405a9c378707.hot-update.js","publicPath":"http://127.0.0.1:8080/app.97542b8e405a9c378707.hot-update.js","path":"/app/dist/app.97542b8e405a9c378707.hot-update.js"}]}}

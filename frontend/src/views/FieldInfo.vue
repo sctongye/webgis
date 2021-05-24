@@ -1,17 +1,7 @@
-<template>
-  <div>
-    <FieldInfoComp v-for="data in jsondata['features']" :key="data" v-bind:mapid="data.id" />
-    <div>
-      <table>
-        <th>id</th><th>geometry</th>
-        <tr v-for="data in jsondata['features']" :key="data">
-          <td>{{ data.id }}</td>
-        </tr>
-      </table>
-    </div>
-    <div>{{ jsondata }}</div>
+<template >
+  <div  class="container">
+    <FieldInfoComp v-for="data in jsondata['features']" :key="data" :mapid="data.id" :geojson="data" />
   </div>
-
 </template>
 
 <script>
@@ -41,4 +31,7 @@ export default {
 </script>
 
 <style scoped>
+.container {
+  margin: 15px;
+}
 </style>
