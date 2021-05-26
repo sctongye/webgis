@@ -34,3 +34,34 @@ class CropCode(models.Model):
 
     def __str__(self):
         return self.crop_name
+
+class PointData(models.Model):
+
+    class Meta:
+        db_table = 'point_data'
+    
+    point = models.GeometryField(unique=True)
+    remarks =models.CharField(max_length=100)
+
+
+class SoilData(models.Model):
+
+    class Meta:
+        db_table = 'soil_data'
+        constraints = [
+            models.UniqueConstraint(
+                fields=["point", "date"],
+                name="soildata_uc"
+            ),
+        ]
+
+    point = models.OneToOneField("PointData", on_delete=models.CASCADE)
+    date = models.DateField()
+    ph = models.FloatField()
+    nitrogen = models.FloatField()
+    phosphoric_acid = models.FloatField()
+    potassium = models.FloatField()
+    magnesium = models.FloatField()
+    calsium = models.FloatField()
+    
+    

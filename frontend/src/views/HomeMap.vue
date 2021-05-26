@@ -5,9 +5,20 @@
 <script>
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
+delete  L.Icon.Default.prototype._getIconUrl
 
 export default {
   mounted() {
+        L.Icon.Default.mergeOptions(
+        {   iconUrl         : require( 'leaflet/dist/images/marker-icon.png' )
+        ,   iconRetinaUrl   : require( 'leaflet/dist/images/marker-icon-2x.png' )
+        ,   shadowUrl       : require( 'leaflet/dist/images/marker-shadow.png' )
+        }
+    )
+
+
+
+
     // 地図表示中央
     const latlng = L.latLng( 43.2121696, 143.2725181 )
 
@@ -23,6 +34,8 @@ export default {
 
     // 地図表示
     var mymap = L.map( 'mainmap', { center: latlng, zoom: 15,layers: [o_std] } )
+
+    L.marker([43.2121696, 143.2725181]).addTo(mymap)
     
     // 地図補足表示
     const baseMaps = {'OSM': o_std,'地理院': t_ort};
@@ -94,7 +107,7 @@ export default {
 
 </script>
 
-<style scoped>
+<style>
 #mainmap {
   width: 100%;
   height: 100vh;
@@ -105,6 +118,6 @@ export default {
   height: 60px;
   background: white;
   border-radius: 5px;
-  opacity: 0.7;
+  opacity: 0.9;
 }
 </style>

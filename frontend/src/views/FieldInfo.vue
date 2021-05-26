@@ -1,16 +1,19 @@
 <template >
   <div  class="container">
-    <FieldInfoComp v-for="data in jsondata['features']" :key="data" :mapid="data.id" :geojson="data" />
+    <PolygonInfoComp v-for="jd in polygonjson['features']" :key="jd" :mapid="'polygon' + jd.id" :geojson="jd" />
+    <PointInfoComp v-for="pd in pointjson['features']" :key="pd" :mapid="'point' + pd.id" :pointjson="pd" />
   </div>
 </template>
 
 <script>
-import FieldInfoComp from '../components/FieldInfoComp'
+import PolygonInfoComp from '../components/PolygonInfoComp'
+import PointInfoComp from '../components/PointInfoComp'
 
 export default {
   data() {
     return {
-      jsondata: [],
+      polygonjson: [],
+      pointjson:[],
     };
   },
   created() {
@@ -19,13 +22,17 @@ export default {
   mounted(){
     this.axios
       .get("/api/v1/polygondata/")
-      .then(response => (this.jsondata = response.data))
+      .then(response => (this.polygonjson = response.data))
+    this.axios
+      .get("/api/v1/soildata/")
+      .then(response => (this.pointjson = response.data))
   },
   methods: {
 
   },
   components: {
-      FieldInfoComp,
+      PolygonInfoComp,
+      PointInfoComp,
   }
 }
 </script>

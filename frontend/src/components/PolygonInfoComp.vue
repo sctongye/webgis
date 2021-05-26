@@ -47,8 +47,5 @@ export default {
 </script>
 
 <style scoped>
-.submap {
-  width: 200px;
-  height: 200px;
-}
+
 </style>
