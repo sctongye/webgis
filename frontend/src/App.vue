@@ -7,7 +7,7 @@
           <router-link to="/" class="list-group-item list-group-item-action bg-light">マップ</router-link>
           <router-link to="/fieldinfo" class="list-group-item list-group-item-action bg-light">圃場情報</router-link>
           <router-link to="/soildata" class="list-group-item list-group-item-action bg-light">土壌分析結果</router-link>
-          <router-link to="/#" class="list-group-item list-group-item-action bg-light">データインポート</router-link>
+          <router-link to="/dataimport" class="list-group-item list-group-item-action bg-light">データインポート</router-link>
         </div>
     </div>
   <!-- /#sidebar-wrapper -->

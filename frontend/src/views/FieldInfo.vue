@@ -1,5 +1,5 @@
 <template >
-  <div  class="container">
+  <div  class="container m-3">
     <PolygonInfoComp v-for="jd in polygonjson['features']" :key="jd" :mapid="'polygon' + jd.id" :geojson="jd" />
     <PointInfoComp v-for="pd in pointjson['features']" :key="pd" :mapid="'point' + pd.id" :pointjson="pd" />
   </div>
@@ -15,9 +15,6 @@ export default {
       polygonjson: [],
       pointjson:[],
     };
-  },
-  created() {
-
   },
   mounted(){
     this.axios
@@ -38,7 +35,5 @@ export default {
 </script>
 
 <style scoped>
-.container {
-  margin: 15px;
-}
+
 </style>

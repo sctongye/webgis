@@ -1,7 +1,24 @@
 <template>
-  <div class="container">
+  <div class="container m-3">
+    <div class="btn-toolbar mb-2 mb-md-0">
+          <div class="btn-group mr-2">
+            <button type="button" class="btn btn-sm btn-outline-secondary">Share</button>
+            <button type="button" class="btn btn-sm btn-outline-secondary">Export</button>
+          </div>
+          <div class="dorpdown">
+            <button type="button" class="btn btn-sm btn-outline-secondary dropdown-toggle">dropdown</button>
+              <div class="dropdown-menu">
+                <a href="" class="dropdown-item">a</a>
+                <a href="" class="dropdown-item">b</a>
+                <a href="" class="dropdown-item">c</a>
+              </div>
+          </div>
+          <div>
+            
+          </div>
+        </div>
       <div class="table-responsive">
-        <table class="table table-striped table-sm">
+        <table class="table table-striped">
           <thead>
             <tr>
               <th>pH</th>
@@ -12,8 +29,8 @@
               <th>石灰</th>
             </tr>
           </thead>
-          <tbody v-for="b in jsondata['features']" :key='b'>
-            <tr>
+          <tbody>
+            <tr  v-for="b in jsondata['features']" :key='b'>
               <td>{{ b['properties'].ph }}</td>
               <td>{{ b['properties'].nitrogen }}</td>
               <td>{{ b['properties'].phosphoric_acid }}</td>
@@ -43,5 +60,4 @@ export default {
 </script>
 
 <style scoped>
-
 </style>
