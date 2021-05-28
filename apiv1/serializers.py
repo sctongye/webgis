@@ -5,8 +5,8 @@ from backend.models import PolygonData,OwnerData,CropCode,PointData,SoilData
 
 class PolygonDataSerializer(GeoFeatureModelSerializer):
 
-    owner_id = serializers.ReadOnlyField(source='owner_id.owner_name')
-    crop_id = serializers.ReadOnlyField(source='crop_id.crop_name')
+    # owner_id = serializers.ReadOnlyField(source='owner_id.owner_name')
+    # crop_id = serializers.ReadOnlyField(source='crop_id.crop_name')
 
     class Meta:
         model = PolygonData
