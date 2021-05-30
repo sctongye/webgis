@@ -5,21 +5,12 @@ delete  L.Icon.Default.prototype._getIconUrl
 export default {
   data() {
     return {
-      mapid: "mainmap"
+      mapid: "mainmap",
+      mymap: null
     }
   },
-  mounted(){
-  // プロパティ初期値定義
-    let centerLatlng = [43.2121696, 143.2725181]
-    let zoomLv = 15
-    let viewLayers = [o_std]
-    let mapInfo = true
-
-    baseMapDrow(centerLatlng,zoomLv,viewLayers,mapInfo)
-  },
   methods: {
-    baseMapDrow:function(centerLatlng,zoomLv,viewLayers,mapInfo){
-
+    baseMapDrow: function(centerLatlng,zoomLv,mapInfo) {
     // 定数定義
       // OpenStreetMap
       const o_std = new L.tileLayer("http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
@@ -38,14 +29,114 @@ export default {
       })
 
       // 地図表示
-      var mymap = L.map( this.mapid , { center: L.latLng(centerLatlng), zoom: zoomLv,layers: viewLayers } )
+      this.mymap = L.map( this.mapid , { center: L.latLng(centerLatlng), zoom: zoomLv,layers: [o_std] } )
 
         // 地図補足表示
-      if (mapinfo === true) {
+      if (mapInfo === true) {
         const baseMaps = {'OSM': o_std,'地理院': t_ort};
-        L.control.layers(baseMaps, null,{collapsed: false}).addTo(mymap);
-        L.control.scale({imperial: false,maxWidth: 300}).addTo(mymap);
+        L.control.layers(baseMaps, null,{collapsed: false}).addTo(this.mymap);
+        L.control.scale({imperial: false,maxWidth: 300}).addTo(this.mymap);
       }
+    },
+    polygonControl: function(geojson,mymap) {
+
+      // マウスオーバー関数
+      function onEachFeature(feature, layer) {
+        layer.on({
+            mouseover: highlightFeature,
+            mouseout: resetHighlight,
+            click: moveGeoInfo
+        });
+      }
+
+      // マウスオーバー:ポリゴン情報の表示
+      function highlightFeature(e) {
+          var layer = e.target;
+          layer.setStyle({
+              weight: 5,
+              color: '#ff0000',
+              dashArray: '',
+              fillOpacity: 0.7
+          });
+          if (!L.Browser.ie && !L.Browser.opera && !L.Browser.edge) {
+              layer.bringToFront();
+          }
+          info.update(layer.feature.properties);
+      }
+
+      // マウスアウト:ポリゴン情報の非表示
+      function resetHighlight(e) {
+          geoJSON.resetStyle(e.target);
+          info.update();
+      }
+
+      // 凡例の表示
+      var info = L.control();
+      info.onAdd = function () {
+          this._div = L.DomUtil.create('div', 'info');
+          this.update();
+          return this._div;
+      };
+      info.update = function (props) {
+          this._div.innerHTML = (props ? '<b>' + props.year + '</b><br />' + props.remarks : 'Field Info');
+      };
+      info.addTo(mymap);
+
+      // geoJSONをマップに表示
+      var geoJSON = L.geoJSON(geojson,{ onEachFeature: onEachFeature}).addTo(mymap)
+
+      // ポリゴンクリックで遷移
+      function moveGeoInfo() {
+        window.location.href ="http://127.0.0.1:8000/fieldinfo"
+      }
+    },
+    pointControl: function(pointjson,mymap) {
+
+      // マウスオーバー関数
+      function onEachFeature(feature, layer) {
+        layer.on({
+            mouseover: highlightFeature,
+            mouseout: resetHighlight,
+        });
+      }
+
+      // マウスオーバー
+      function highlightFeature(e) {
+          var layer = e.target;
+          layer.setStyle({
+            radius: 40,
+            fillColor: "#ff0000",
+            color: "#ff0000",
+            weight: 1,
+            opacity: 1,
+            fillOpacity: 0.8
+          });
+          if (!L.Browser.ie && !L.Browser.opera && !L.Browser.edge) {
+              layer.bringToFront();
+          }
+      }
+
+      // マウスアウト
+      function resetHighlight(e) {
+          geoJSON.resetStyle(e.target);
+      }
+
+      // サークルアイコンの作成
+      function customCircleMarker (feature, latlng) {
+        var geojsonMarkerOptions = {
+            radius: 40,
+            fillColor: "#fffc66",
+            color: "#000",
+            weight: 1,
+            opacity: 1,
+            fillOpacity: 0.8
+        }
+        return L.circleMarker(latlng, geojsonMarkerOptions)
+      }
+
+      
+      let geoJSON = L.geoJSON(pointjson,{ onEachFeature: onEachFeature, pointToLayer: customCircleMarker }).addTo(mymap)
     }
+
   },
 }
