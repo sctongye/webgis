@@ -5,6 +5,7 @@ import store from './store'
 import axios from 'axios' //追記
 import VueAxios from 'vue-axios' //追記
 
+import 'bootstrap'
 import "bootstrap/dist/css/bootstrap.min.css";
 
 const app = createApp(App)

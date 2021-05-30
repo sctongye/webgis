@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from rest_framework_gis.serializers import GeoFeatureModelSerializer
-from backend.models import PolygonData,OwnerData,CropCode,PointData,SoilData
+from backend.models import PolygonData,OwnerData,CropCode,SoilData
 
 
 class PolygonDataSerializer(GeoFeatureModelSerializer):
@@ -27,19 +27,19 @@ class CropCodeSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-class PointDataSerializer(GeoFeatureModelSerializer):
+# class PointDataSerializer(GeoFeatureModelSerializer):
 
-    class Meta:
-        model = PointData
-        fields = '__all__'
-        geo_field = 'point'
+#     class Meta:
+#         model = PointData
+#         fields = '__all__'
+#         geo_field = 'point'
 
 
 class SoilDataSerializer(GeoFeatureModelSerializer):
 
     # point,date,nitrogen,phosphoric_acid,potassium,magnesium,calsium
 
-    point = PointDataSerializer()
+    # point = PointDataSerializer()
 
     class Meta:
         model = SoilData

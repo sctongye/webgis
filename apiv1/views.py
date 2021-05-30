@@ -1,6 +1,6 @@
 from rest_framework import viewsets
-from backend.models import PolygonData,OwnerData,CropCode,PointData,SoilData
-from .serializers import PolygonDataSerializer,OwnerDataSerializer,CropCodeSerializer,PointDataSerializer,SoilDataSerializer
+from backend.models import PolygonData,OwnerData,CropCode,SoilData
+from .serializers import PolygonDataSerializer,OwnerDataSerializer,CropCodeSerializer,SoilDataSerializer
 
 
 class PolygonDataViewSet(viewsets.ModelViewSet):
@@ -20,10 +20,10 @@ class CropCodeViewSet(viewsets.ModelViewSet):
     serializer_class = CropCodeSerializer
 
 
-class PointDataViewSet(viewsets.ModelViewSet):
+# class PointDataViewSet(viewsets.ModelViewSet):
 
-    queryset = PointData.objects.all()
-    serializer_class = PointDataSerializer
+#     queryset = PointData.objects.all()
+#     serializer_class = PointDataSerializer
 
 
 class SoilDataViewSet(viewsets.ModelViewSet):

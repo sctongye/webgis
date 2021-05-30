@@ -1,6 +1,6 @@
 <template>
   <div class="row p-2">
-    <div v-bind:id="mapid" class="col-md-4"></div>
+    <div v-bind:id="mapid" class="col-md-4 mapstyle"></div>
       <div class="lead col-md-8">
         <ul class="mb-0">
           <li>pH:{{ pointjson['properties']['ph'] }}</li>
@@ -35,19 +35,22 @@ export default {
         }
     )
 
+    // leafletで扱えるmapidは文字列
     const map = this.mapid.toString()
-    var geometry = [this.pointjson['geometry']['geometry']['coordinates'][1],this.pointjson['geometry']['geometry']['coordinates'][0]]
-
 
     // 地図表示中央
-    const center_latlng = L.latLng(geometry)
+    const center_latlng = L.latLng(this.pointjson['geometry']['coordinate'])
+
     // OpenStreetMap
     const o_std = new L.tileLayer("http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png")
 
     // 地図表示
     const mymap = L.map( map, { center: center_latlng, zoom: 15,zoomControl:false,layers: [o_std]} )
     
-    L.marker(geometry).addTo(mymap)
+    const geometry = L.geoJSON(this.pointjson).addTo(mymap)
+
+    // 重心に移動
+    mymap.fitBounds(geometry.getBounds())
   },
   methods: {
 
@@ -56,4 +59,8 @@ export default {
 </script>
 
 <style scoped>
+.mapstyle {
+  height: 200px;
+  width: 200px;
+}
 </style>

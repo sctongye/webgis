@@ -1,6 +1,6 @@
 <template>
   <div class="row p-2">
-    <div v-bind:id="mapid" class="col-md-4"></div>
+    <div v-bind:id="mapid" class="col-md-4 mapstyle"></div>
       <div class="lead col-md-8">
         <ul class="mb-0">
           <li>{{ geojson['properties']['year'] }}</li>
@@ -25,8 +25,8 @@ export default {
   props: ['mapid','geojson'],
   mounted(){
 
+    // leafletで扱えるmapidは文字列
     const map = this.mapid.toString()
-    const geometry = this.geojson
 
     // 地図表示中央
     const latlng = L.latLng(this.latlng)
@@ -35,9 +35,10 @@ export default {
 
     // 地図表示
     const mymap = L.map( map, { center: latlng, zoom: 15,zoomControl:false,layers: [o_std]} )
-    const geojson = L.geoJSON(geometry).addTo(mymap)
+    const geometry = L.geoJSON(this.geojson).addTo(mymap)
 
-    mymap.fitBounds(geojson.getBounds())
+    // 重心に移動
+    mymap.fitBounds(geometry.getBounds())
 
   },
   methods: {
@@ -47,5 +48,8 @@ export default {
 </script>
 
 <style scoped>
-
+.mapstyle {
+  height: 200px;
+  width: 200px;
+}
 </style>

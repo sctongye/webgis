@@ -3,7 +3,7 @@
   <!-- Sidebar -->
     <div class="bg-light border-right" id="sidebar-wrapper">
       <div class="sidebar-heading">Web-GIS</div>
-        <div class="list-group">
+        <div class="list-group list-group-mine">
           <router-link to="/" class="list-group-item list-group-item-action bg-light">マップ</router-link>
           <router-link to="/fieldinfo" class="list-group-item list-group-item-action bg-light">圃場情報</router-link>
           <router-link to="/soildata" class="list-group-item list-group-item-action bg-light">土壌分析結果</router-link>
@@ -38,6 +38,7 @@ export default {
 .list-group {
   width: 15rem;
 }
+
 #page-content-wrapper {
   width: 100vw;
 }

@@ -5,7 +5,7 @@ from rest_framework import routers
 
 router = routers.DefaultRouter()
 router.register('polygondata',views.PolygonDataViewSet)
-router.register('pointdata',views.PointDataViewSet)
+# router.register('pointdata',views.PointDataViewSet)
 router.register('soildata',views.SoilDataViewSet)
 router.register('ownerdata',views.OwnerDataViewSet)
 router.register('cropcode',views.CropCodeViewSet)
