@@ -56,4 +56,13 @@ export default {
   background-color: rgba(0, 123, 255, .15);
   border: 1px solid rgba(0, 123, 255, .2);
 }
+
+.info {
+  font-size: 16px;
+  width: 120px;
+  height: 60px;
+  background: white;
+  border-radius: 5px;
+  opacity: 0.9;
+}
 </style>
