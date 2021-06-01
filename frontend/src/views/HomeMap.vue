@@ -42,7 +42,7 @@ export default {
     })
 
     // 地図表示
-    let mymap = L.map( this.mapid , { center: L.latLng(centerLatlng), zoom: zoomLv,layers: [o_std] } )
+    let mymap = L.map( this.mapid , { center: L.latLng(centerLatlng), zoom: zoomLv,zoominfoControl: true,layers: [o_std] } )
 
     // 地図補足表示
     if (mapInfo === true) {
@@ -54,20 +54,19 @@ export default {
 
   // axiosでbackendからポリゴンデータを取得、response.dataをMapDrowの各メソッドに渡す
     this.axios
-        .get("/api/v1/polygondata/")
-        .then( response => ( this.polygonControl(response.data,mymap)) )
-        .catch( error => this.apiError = error)
-    this.axios
         .get("/api/v1/soildata/")
         .then( response => ( this.pointControl(response.data,mymap)) )
         .catch( error => this.apiError = error)
+    this.axios
+        .get("/api/v1/polygondata/")
+        .then( response => ( this.polygonControl(response.data,mymap)) )
+        .catch( error => this.apiError = error)
+    
+    // L.controll().onAdd
 
   },
   methods: {
     pointControl: function(pointjson,mymap) {
-
-      // pointジオメトリの描画
-      let pointJSON = L.geoJSON(pointjson,{ onEachFeature: onEachFeature, pointToLayer: customCircleMarker }).addTo(mymap)
 
       // マウスイベント制御
       function onEachFeature(feature, layer) {
@@ -95,11 +94,13 @@ export default {
 
       // マウスアウト
       function resetHighlight(e) {
-          pointJSON.resetStyle(e.target);
+          pointJSON_K.resetStyle(e.target);
+          pointJSON_P.resetStyle(e.target);
+
       }
 
       // サークルアイコンの作成
-      function customCircleMarker (feature, latlng) {
+      function customCircleMarkerK (feature, latlng) {
 
         let potassiumValue = feature['properties']["potassium"]
 
@@ -120,6 +121,53 @@ export default {
 
         return L.circleMarker(latlng, geojsonMarkerOptions)
       }
+
+      // サークルアイコンの作成
+      function customCircleMarkerP (feature, latlng) {
+
+        let phosphoricAcidValue = feature['properties']["phosphoric_acid"]
+
+        var geojsonMarkerOptions = {
+              radius: 40,
+              color: "#000",
+              weight: 1,
+              opacity: 1,
+              fillOpacity: 0.8
+            }
+            
+        if        ( phosphoricAcidValue < 5 )  { geojsonMarkerOptions['fillColor'] = "#56C1FF"
+        } else if ( phosphoricAcidValue < 10 ) { geojsonMarkerOptions['fillColor'] = "#73FDEA"
+        } else if ( phosphoricAcidValue < 30 ) { geojsonMarkerOptions['fillColor'] = "#FFFC66"
+        } else if ( phosphoricAcidValue < 60)  { geojsonMarkerOptions['fillColor'] = "#FF9300"
+        } else                                 { geojsonMarkerOptions['fillColor'] = "#FF644E"
+        }
+
+        return L.circleMarker(latlng, geojsonMarkerOptions)
+      }
+
+
+
+      // pointジオメトリの描画
+      let pointJSON_K = L.geoJSON(pointjson,{ onEachFeature: onEachFeature, pointToLayer: customCircleMarkerK }).addTo(mymap)
+      let pointJSON_P = L.geoJSON(pointjson,{ onEachFeature: onEachFeature, pointToLayer: customCircleMarkerP }).addTo(mymap)
+
+      const soilStatus = {'有効態リン酸': pointJSON_K,'交換性カリ': pointJSON_P};
+      L.control.layers(soilStatus, null,{collapsed: false}).addTo(mymap);
+
+
+
+      mymap.on('move',function(){
+        output(mymap)
+      })
+
+      function output(map) {
+        var zoom = map.getZoom()
+         console.log(zoom)
+      }
+
+
+
+
     },
     polygonControl: function(polyjson,mymap) {
 
