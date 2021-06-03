@@ -1,0 +1,831 @@
+commit 4a7d757c53da3fb9ea0fe0b93477f9a0be4affd3
+Author: M.Goto <sindicum@icloud.com>
+Date:   Wed Jun 2 00:28:30 2021 +0900
+
+    implement select button of  soil status
+
+diff --git a/frontend/src/views/HomeMap.vue b/frontend/src/views/HomeMap.vue
+index cffa14b..e6a50d4 100644
+--- a/frontend/src/views/HomeMap.vue
++++ b/frontend/src/views/HomeMap.vue
+@@ -42,7 +42,7 @@ export default {
+     })
+ 
+     // 地図表示
+-    let mymap = L.map( this.mapid , { center: L.latLng(centerLatlng), zoom: zoomLv,layers: [o_std] } )
++    let mymap = L.map( this.mapid , { center: L.latLng(centerLatlng), zoom: zoomLv,zoominfoControl: true,layers: [o_std] } )
+ 
+     // 地図補足表示
+     if (mapInfo === true) {
+@@ -53,22 +53,21 @@ export default {
+ 
+ 
+   // axiosでbackendからポリゴンデータを取得、response.dataをMapDrowの各メソッドに渡す
+-    this.axios
+-        .get("/api/v1/polygondata/")
+-        .then( response => ( this.polygonControl(response.data,mymap)) )
+-        .catch( error => this.apiError = error)
+     this.axios
+         .get("/api/v1/soildata/")
+         .then( response => ( this.pointControl(response.data,mymap)) )
+         .catch( error => this.apiError = error)
++    this.axios
+  .get("/api/v1/polygondata/")
+  .then( response => ( this.polygonControl(response.data,mymap)) )
+  .catch( error => this.apiError = error)
++    
++    // L.controll().onAdd
+ 
+   },
+   methods: {
+     pointControl: function(pointjson,mymap) {
+ 
+-      // pointジオメトリの描画
+-      let pointJSON = L.geoJSON(pointjson,{ onEachFeature: onEachFeature, pointToLayer: customCircleMarker }).addTo(mymap)
+-
+       // マウスイベント制御
+       function onEachFeature(feature, layer) {
+         layer.on({
+@@ -95,11 +94,13 @@ export default {
+ 
+       // マウスアウト
+       function resetHighlight(e) {
+-          pointJSON.resetStyle(e.target);
+    pointJSON_K.resetStyle(e.target);
+    pointJSON_P.resetStyle(e.target);
++
+       }
+ 
+       // サークルアイコンの作成
+-      function customCircleMarker (feature, latlng) {
+function customCircleMarkerK (feature, latlng) {
+ 
+         let potassiumValue = feature['properties']["potassium"]
+ 
+@@ -120,6 +121,53 @@ export default {
+ 
+         return L.circleMarker(latlng, geojsonMarkerOptions)
+       }
++
+// サークルアイコンの作成
+function customCircleMarkerP (feature, latlng) {
++
+  let phosphoricAcidValue = feature['properties']["phosphoric_acid"]
++
+  var geojsonMarkerOptions = {
+        radius: 40,
+        color: "#000",
+        weight: 1,
+        opacity: 1,
+        fillOpacity: 0.8
+      }
+      
+  if        ( phosphoricAcidValue < 5 )  { geojsonMarkerOptions['fillColor'] = "#56C1FF"
+  } else if ( phosphoricAcidValue < 10 ) { geojsonMarkerOptions['fillColor'] = "#73FDEA"
+  } else if ( phosphoricAcidValue < 30 ) { geojsonMarkerOptions['fillColor'] = "#FFFC66"
+  } else if ( phosphoricAcidValue < 60)  { geojsonMarkerOptions['fillColor'] = "#FF9300"
+  } else                                 { geojsonMarkerOptions['fillColor'] = "#FF644E"
+  }
++
+  return L.circleMarker(latlng, geojsonMarkerOptions)
+}
++
++
++
+// pointジオメトリの描画
+let pointJSON_K = L.geoJSON(pointjson,{ onEachFeature: onEachFeature, pointToLayer: customCircleMarkerK }).addTo(mymap)
+let pointJSON_P = L.geoJSON(pointjson,{ onEachFeature: onEachFeature, pointToLayer: customCircleMarkerP }).addTo(mymap)
++
+const soilStatus = {'有効態リン酸': pointJSON_K,'交換性カリ': pointJSON_P};
+L.control.layers(soilStatus, null,{collapsed: false}).addTo(mymap);
++
++
++
+mymap.on('move',function(){
+  output(mymap)
+})
++
+function output(map) {
+  var zoom = map.getZoom()
+   console.log(zoom)
+}
++
++
++
++
+     },
+     polygonControl: function(polyjson,mymap) {
+ 
+diff --git a/frontend/webpack-stats.json b/frontend/webpack-stats.json
+index 1c30e40..ac077cc 100644
+--- a/frontend/webpack-stats.json
++++ b/frontend/webpack-stats.json
+@@ -1 +1 @@
+-{"status":"done","publicPath":"http://127.0.0.1:8080/","chunks":{"app":[{"name":"bundle.js","publicPath":"http://127.0.0.1:8080/bundle.js","path":"/app/dist/bundle.js"},{"name":"app.2690beeb6c8c1cf1981a.hot-update.js","publicPath":"http://127.0.0.1:8080/app.2690beeb6c8c1cf1981a.hot-update.js","path":"/app/dist/app.2690beeb6c8c1cf1981a.hot-update.js"}]},"error":"ModuleError","message":"Module Error (from ./node_modules/eslint-loader/index.js):\n\n/app/src/views/HomeMap.vue\n  73:33  error  'pointjson' is not defined  no-undef\n\n✖ 1 problem (1 error, 0 warnings)\n"}
+\ No newline at end of file
++{"status":"done","publicPath":"http://127.0.0.1:8080/","chunks":{"app":[{"name":"bundle.js","publicPath":"http://127.0.0.1:8080/bundle.js","path":"/app/dist/bundle.js"},{"name":"app.c5de13dbba0e8b397251.hot-update.js","publicPath":"http://127.0.0.1:8080/app.c5de13dbba0e8b397251.hot-update.js","path":"/app/dist/app.c5de13dbba0e8b397251.hot-update.js"}]},"error":"ModuleError","message":"Module Error (from ./node_modules/eslint-loader/index.js):\n\n/app/src/views/HomeMap.vue\n  160:9   error  'output' is not defined                         no-undef\n  163:11  error  'getzoomLv' is assigned a value but never used  no-unused-vars\n\n✖ 2 problems (2 errors, 0 warnings)\n"}
+\ No newline at end of file
+
+commit b14041d904658b7692ce49f84a72af8bf20a0c15
+Author: M.Goto <sindicum@icloud.com>
+Date:   Tue Jun 1 00:24:46 2021 +0900
+
+    modify circle drow bug
+
+diff --git a/frontend/src/mixins/MapDrow.js b/frontend/src/mixins/MapDrow.js
+deleted file mode 100644
+index 077e3e3..0000000
+--- a/frontend/src/mixins/MapDrow.js
++++ /dev/null
+@@ -1,186 +0,0 @@
+-import L from 'leaflet'
+-import 'leaflet/dist/leaflet.css'
+-delete  L.Icon.Default.prototype._getIconUrl
+-
+-export default {
+-  data() {
+-    return {
+-      mapid: "mainmap",
+-      mymap: null
+-    }
+-  },
+-  methods: {
+-    baseMapDrow: function(centerLatlng,zoomLv,mapInfo) {
+-    // 定数定義
+-      // OpenStreetMap
+-      const o_std = new L.tileLayer("http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+-          attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
+-          });
+-      // 地理院タイルの定義
+-      const t_ort = new L.tileLayer("http://cyberjapandata.gsi.go.jp/xyz/ort/{z}/{x}/{y}.jpg", {
+-          attribution: "<a href='http://www.gsi.go.jp/kikakuchousei/kikakuchousei40182.html' target='_blank'>国土地理院</a>"
+-          });
+-
+-      // leafletアイコンの設定
+-      L.Icon.Default.mergeOptions({
+-        iconUrl: require( 'leaflet/dist/images/marker-icon.png'),
+-        iconRetinaUrl: require( 'leaflet/dist/images/marker-icon-2x.png'),
+-        shadowUrl: require( 'leaflet/dist/images/marker-shadow.png' )
+-      })
+-
+-      // 地図表示
+-      this.mymap = L.map( this.mapid , { center: L.latLng(centerLatlng), zoom: zoomLv,layers: [o_std] } )
+-
+-        // 地図補足表示
+-      if (mapInfo === true) {
+-        const baseMaps = {'OSM': o_std,'地理院': t_ort};
+-        L.control.layers(baseMaps, null,{collapsed: false}).addTo(this.mymap);
+-        L.control.scale({imperial: false,maxWidth: 300}).addTo(this.mymap);
+-      }
+-    },
+-    // polygonControl: function(geojson,mymap) {
+-
+-    //   // マウスオーバー関数
+-    //   function onEachFeature(feature, layer) {
+-    //     layer.on({
+-    //         mouseover: highlightFeature,
+-    //         mouseout: resetHighlight,
+-    //         click: moveGeoInfo
+-    //     });
+-    //   }
+-
+-    //   // マウスオーバー:ポリゴン情報の表示
+-    //   function highlightFeature(e) {
+-    //       var layer = e.target;
+-    //       layer.setStyle({
+-    //           weight: 5,
+-    //           color: '#ff0000',
+-    //           dashArray: '',
+-    //           fillOpacity: 0.7
+-    //       });
+-    //       if (!L.Browser.ie && !L.Browser.opera && !L.Browser.edge) {
+-    //           layer.bringToFront();
+-    //       }
+-    //       info.update(layer.feature.properties);
+-    //   }
+-
+-    //   // マウスアウト:ポリゴン情報の非表示
+-    //   function resetHighlight(e) {
+-    //       geoJSON.resetStyle(e.target);
+-    //       info.update();
+-    //   }
+-
+-    //   // 凡例の表示
+-    //   var info = L.control();
+-    //   info.onAdd = function () {
+-    //       this._div = L.DomUtil.create('div', 'info');
+-    //       this.update();
+-    //       return this._div;
+-    //   };
+-    //   info.update = function (props) {
+-    //       this._div.innerHTML = (props ? '<b>' + props.year + '</b><br />' + props.remarks : 'Field Info');
+-    //   };
+-    //   info.addTo(mymap);
+-
+-    //   // geoJSONをマップに表示
+-    //   var geoJSON = L.geoJSON(geojson,{ onEachFeature: onEachFeature}).addTo(mymap)
+-
+-    //   // ポリゴンクリックで遷移
+-    //   function moveGeoInfo() {
+-    //     window.location.href ="http://127.0.0.1:8000/fieldinfo"
+-    //   }
+-    // },
+-    pointControl: function(pointjson,mymap) {
+-
+-      // マウスオーバー関数
+-      function onEachFeature(feature, layer) {
+-        layer.on({
+-            mouseover: highlightFeature,
+-            mouseout: resetHighlight,
+-        });
+-      }
+-
+-      // マウスオーバー
+-      function highlightFeature(e) {
+-          var layer = e.target;
+-          layer.setStyle({
+-            radius: 40,
+-            fillColor: "#ff0000",
+-            color: "#ff0000",
+-            weight: 1,
+-            opacity: 1,
+-            fillOpacity: 0.8
+-          });
+-          if (!L.Browser.ie && !L.Browser.opera && !L.Browser.edge) {
+-              layer.bringToFront();
+-          }
+-      }
+-
+-      // マウスアウト
+-      function resetHighlight(e) {
+-          geoJSON.resetStyle(e.target);
+-      }
+-
+-      // サークルアイコンの作成
+-      function customCircleMarker (feature, latlng) {
+-
+-        let potassiumValue = feature['properties']["potassium"]
+-
+-        var geojsonMarkerOptions = {
+-              radius: 40,
+-              color: "#000",
+-              weight: 1,
+-              opacity: 1,
+-              fillOpacity: 0.8
+-            }
+-            
+-        if        ( potassiumValue < 8 )  { geojsonMarkerOptions['fillColor'] = "#56C1FF"
+-        } else if ( potassiumValue < 15 ) { geojsonMarkerOptions['fillColor'] = "#73FDEA"
+-        } else if ( potassiumValue < 30 ) { geojsonMarkerOptions['fillColor'] = "#FFFC66"
+-        } else if ( potassiumValue < 50)  { geojsonMarkerOptions['fillColor'] = "#FF9300"
+-        } else                            { geojsonMarkerOptions['fillColor'] = "#FF644E"
+-        }
+-
+-        return L.circleMarker(latlng, geojsonMarkerOptions)
+-      }
+-
+-      let geoJSON = L.geoJSON(pointjson,{ onEachFeature: onEachFeature, pointToLayer: customCircleMarker }).addTo(mymap)
+-
+-      // for (var i = 0; i <pointjson["features"].length; i++) {
+-        
+-      //   let lng = pointjson["features"][i]['geometry']['coordinates'][1]
+-      //   let lat = pointjson["features"][i]['geometry']['coordinates'][0]
+-
+-      //   // L.circle([lng,lat], circleMarkerOptions()).addTo(mymap)
+-      //   L.circle([lng,lat], {radius: 50}).addTo(mymap)
+-      // }
+-
+-      // function circleMarkerOptions() {
+-      //   let options = {
+-      //                   radius: 50,
+-      //                   fillColor: "#fffc66",
+-      //                   color: "#000",
+-      //                   weight: 1,
+-      //                   opacity: 1,
+-      //                   fillOpacity: 0.8
+-      //                 }
+-      //   return options
+-      // }
+-
+-      // function getRadius(zoomLevel){
+-
+-      //   if (zoomLevel < 15) {
+-      //     return 80
+-      //   } else {
+-      //     return 40
+-      //   }
+-      // }
+-
+-      // let zoomlevel = mymap.on('zoom',function(e){
+-      //                 })
+-      // console.log(zoomlevel)
+-
+-    }
+-
+-  },
+-}
+diff --git a/frontend/src/views/HomeMap.vue b/frontend/src/views/HomeMap.vue
+index 22f2e6d..cffa14b 100644
+--- a/frontend/src/views/HomeMap.vue
++++ b/frontend/src/views/HomeMap.vue
+@@ -8,36 +8,172 @@
+ </template>
+ 
+ <script>
+-import MapDrow from '../mixins/MapDrow'
++import L from 'leaflet'
++import 'leaflet/dist/leaflet.css'
++delete  L.Icon.Default.prototype._getIconUrl
+ 
+ export default {
+   data(){
+     return {
+mapid: "mainmap",
+       apiError: false
+     }
+   },
+   mounted() {
+-  // プロパティ初期値定義
++    // プロパティ初期値の定義
+     var centerLatlng = [43.2121696, 143.2725181]
+     var zoomLv = 15
+     var mapInfo = true
+ 
+-  // MapDrowのbaseMapDrowメソッド
+-    this.baseMapDrow(centerLatlng,zoomLv,mapInfo)
++    // OpenStreetMapの定義
++    const o_std = new L.tileLayer("http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+  attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
+  });
++    // 地理院タイルの定義
++    const t_ort = new L.tileLayer("http://cyberjapandata.gsi.go.jp/xyz/ort/{z}/{x}/{y}.jpg", {
+  attribution: "<a href='http://www.gsi.go.jp/kikakuchousei/kikakuchousei40182.html' target='_blank'>国土地理院</a>"
+  });
+ 
+-  // axiosでbackendからポリゴンデータを取得
+-  // response.dataをMapDrowの各メソッドに渡す
+-    // this.mymap -> MapDrowのmymap
+-    // this.axios
+-    //     .get("/api/v1/polygondata/")
+-    //     .then( response => ( this.polygonControl(response.data,this.mymap)) )
+-    //     .catch( error => this.apiError = error)
++    // leafletアイコンの設定
++    L.Icon.Default.mergeOptions({
+iconUrl: require( 'leaflet/dist/images/marker-icon.png'),
+iconRetinaUrl: require( 'leaflet/dist/images/marker-icon-2x.png'),
+shadowUrl: require( 'leaflet/dist/images/marker-shadow.png' )
++    })
++
++    // 地図表示
++    let mymap = L.map( this.mapid , { center: L.latLng(centerLatlng), zoom: zoomLv,layers: [o_std] } )
++
++    // 地図補足表示
++    if (mapInfo === true) {
+const baseMaps = {'OSM': o_std,'地理院': t_ort};
+L.control.layers(baseMaps, null,{collapsed: false}).addTo(mymap);
+L.control.scale({imperial: false,maxWidth: 300}).addTo(mymap);
++    }
++
++
++  // axiosでbackendからポリゴンデータを取得、response.dataをMapDrowの各メソッドに渡す
++    this.axios
+  .get("/api/v1/polygondata/")
+  .then( response => ( this.polygonControl(response.data,mymap)) )
+  .catch( error => this.apiError = error)
+     this.axios
+         .get("/api/v1/soildata/")
+-        .then( response => ( this.pointControl(response.data,this.mymap)) )
+  .then( response => ( this.pointControl(response.data,mymap)) )
+         .catch( error => this.apiError = error)
++
++  },
++  methods: {
++    pointControl: function(pointjson,mymap) {
++
+// pointジオメトリの描画
+let pointJSON = L.geoJSON(pointjson,{ onEachFeature: onEachFeature, pointToLayer: customCircleMarker }).addTo(mymap)
++
+// マウスイベント制御
+function onEachFeature(feature, layer) {
+  layer.on({
+      mouseover: highlightFeature,
+      mouseout: resetHighlight,
+  });
+}
++
+// マウスオーバー
+function highlightFeature(e) {
+    var layer = e.target;
+    layer.setStyle({
+      radius: 40,
+      fillColor: "#ff0000",
+      color: "#ff0000",
+      weight: 1,
+      opacity: 1,
+      fillOpacity: 0.8
+    });
+    if (!L.Browser.ie && !L.Browser.opera && !L.Browser.edge) {
+        layer.bringToFront();
+    }
+}
++
+// マウスアウト
+function resetHighlight(e) {
+    pointJSON.resetStyle(e.target);
+}
++
+// サークルアイコンの作成
+function customCircleMarker (feature, latlng) {
++
+  let potassiumValue = feature['properties']["potassium"]
++
+  var geojsonMarkerOptions = {
+        radius: 40,
+        color: "#000",
+        weight: 1,
+        opacity: 1,
+        fillOpacity: 0.8
+      }
+      
+  if        ( potassiumValue < 8 )  { geojsonMarkerOptions['fillColor'] = "#56C1FF"
+  } else if ( potassiumValue < 15 ) { geojsonMarkerOptions['fillColor'] = "#73FDEA"
+  } else if ( potassiumValue < 30 ) { geojsonMarkerOptions['fillColor'] = "#FFFC66"
+  } else if ( potassiumValue < 50)  { geojsonMarkerOptions['fillColor'] = "#FF9300"
+  } else                            { geojsonMarkerOptions['fillColor'] = "#FF644E"
+  }
++
+  return L.circleMarker(latlng, geojsonMarkerOptions)
+}
++    },
++    polygonControl: function(polyjson,mymap) {
++
+// polygonジオメトリの描画
+let polyJSON = L.geoJSON(polyjson,{ onEachFeature: onEachFeature}).addTo(mymap)
++
+// マウスイベント制御
+function onEachFeature(feature, layer) {
+  layer.on({
+      mouseover: highlightFeature,
+      mouseout: resetHighlight,
+      click: moveGeoInfo
+  });
+}
++
+// マウスオーバー:ポリゴン情報の表示
+function highlightFeature(e) {
+    var layer = e.target;
+    layer.setStyle({
+        weight: 5,
+        color: '#ff0000',
+        dashArray: '',
+        fillOpacity: 0.7
+    });
+    if (!L.Browser.ie && !L.Browser.opera && !L.Browser.edge) {
+        layer.bringToFront();
+    }
+    info.update(layer.feature.properties);
+}
++
+// マウスアウト:ポリゴン情報の非表示
+function resetHighlight(e) {
+    polyJSON.resetStyle(e.target);
+    info.update();
+}
++
+// 凡例の表示
+var info = L.control();
+info.onAdd = function () {
+    this._div = L.DomUtil.create('div', 'info');
+    this.update();
+    return this._div;
+};
+info.update = function (props) {
+    this._div.innerHTML = (props ? '<b>' + props.year + '</b><br />' + props.remarks : 'Field Info');
+};
+info.addTo(mymap);
++
+// ポリゴンクリックで遷移
+function moveGeoInfo() {
+  window.location.href ="http://127.0.0.1:8000/fieldinfo"
+}
++    },
+   },
+-  mixins: [MapDrow]
+ }
+ </script>
+ 
+diff --git a/frontend/webpack-stats.json b/frontend/webpack-stats.json
+index 2d6caee..1c30e40 100644
+--- a/frontend/webpack-stats.json
++++ b/frontend/webpack-stats.json
+@@ -1 +1 @@
+-{"status":"done","publicPath":"http://127.0.0.1:8080/","error":"ModuleError","message":"Module Error (from ./node_modules/eslint-loader/index.js):\n\n/app/src/mixins/MapDrow.js\n  20:13  error  't_ort' is assigned a value but never used  no-unused-vars\n\n✖ 1 problem (1 error, 0 warnings)\n","chunks":{"app":[{"name":"bundle.js","publicPath":"http://127.0.0.1:8080/bundle.js","path":"/app/dist/bundle.js"},{"name":"app.ee4e196256f49ef6eccd.hot-update.js","publicPath":"http://127.0.0.1:8080/app.ee4e196256f49ef6eccd.hot-update.js","path":"/app/dist/app.ee4e196256f49ef6eccd.hot-update.js"}]}}
+\ No newline at end of file
++{"status":"done","publicPath":"http://127.0.0.1:8080/","chunks":{"app":[{"name":"bundle.js","publicPath":"http://127.0.0.1:8080/bundle.js","path":"/app/dist/bundle.js"},{"name":"app.2690beeb6c8c1cf1981a.hot-update.js","publicPath":"http://127.0.0.1:8080/app.2690beeb6c8c1cf1981a.hot-update.js","path":"/app/dist/app.2690beeb6c8c1cf1981a.hot-update.js"}]},"error":"ModuleError","message":"Module Error (from ./node_modules/eslint-loader/index.js):\n\n/app/src/views/HomeMap.vue\n  73:33  error  'pointjson' is not defined  no-undef\n\n✖ 1 problem (1 error, 0 warnings)\n"}
+\ No newline at end of file
+
+commit a96bdda60e4161f8a54d672748c20c3f5996df4f
+Author: M.Goto <sindicum@icloud.com>
+Date:   Sun May 30 23:54:27 2021 +0900
+
+    circle fill color each other but occur mixin's error
+
+diff --git a/frontend/src/App.vue b/frontend/src/App.vue
+index 85859d9..46c11a3 100644
+--- a/frontend/src/App.vue
++++ b/frontend/src/App.vue
+@@ -56,4 +56,13 @@ export default {
+   background-color: rgba(0, 123, 255, .15);
+   border: 1px solid rgba(0, 123, 255, .2);
+ }
++
++.info {
++  font-size: 16px;
++  width: 120px;
++  height: 60px;
++  background: white;
++  border-radius: 5px;
++  opacity: 0.9;
++}
+ </style>
+diff --git a/frontend/src/mixins/MapDrow.js b/frontend/src/mixins/MapDrow.js
+index fc2f049..077e3e3 100644
+--- a/frontend/src/mixins/MapDrow.js
++++ b/frontend/src/mixins/MapDrow.js
+@@ -38,58 +38,58 @@ export default {
+         L.control.scale({imperial: false,maxWidth: 300}).addTo(this.mymap);
+       }
+     },
+-    polygonControl: function(geojson,mymap) {
+-
+-      // マウスオーバー関数
+-      function onEachFeature(feature, layer) {
+-        layer.on({
+-            mouseover: highlightFeature,
+-            mouseout: resetHighlight,
+-            click: moveGeoInfo
+-        });
+-      }
+-
+-      // マウスオーバー:ポリゴン情報の表示
+-      function highlightFeature(e) {
+-          var layer = e.target;
+-          layer.setStyle({
+-              weight: 5,
+-              color: '#ff0000',
+-              dashArray: '',
+-              fillOpacity: 0.7
+-          });
+-          if (!L.Browser.ie && !L.Browser.opera && !L.Browser.edge) {
+-              layer.bringToFront();
+-          }
+-          info.update(layer.feature.properties);
+-      }
+-
+-      // マウスアウト:ポリゴン情報の非表示
+-      function resetHighlight(e) {
+-          geoJSON.resetStyle(e.target);
+-          info.update();
+-      }
+-
+-      // 凡例の表示
+-      var info = L.control();
+-      info.onAdd = function () {
+-          this._div = L.DomUtil.create('div', 'info');
+-          this.update();
+-          return this._div;
+-      };
+-      info.update = function (props) {
+-          this._div.innerHTML = (props ? '<b>' + props.year + '</b><br />' + props.remarks : 'Field Info');
+-      };
+-      info.addTo(mymap);
+-
+-      // geoJSONをマップに表示
+-      var geoJSON = L.geoJSON(geojson,{ onEachFeature: onEachFeature}).addTo(mymap)
+-
+-      // ポリゴンクリックで遷移
+-      function moveGeoInfo() {
+-        window.location.href ="http://127.0.0.1:8000/fieldinfo"
+-      }
+-    },
++    // polygonControl: function(geojson,mymap) {
++
++    //   // マウスオーバー関数
++    //   function onEachFeature(feature, layer) {
++    //     layer.on({
++    //         mouseover: highlightFeature,
++    //         mouseout: resetHighlight,
++    //         click: moveGeoInfo
++    //     });
++    //   }
++
++    //   // マウスオーバー:ポリゴン情報の表示
++    //   function highlightFeature(e) {
++    //       var layer = e.target;
++    //       layer.setStyle({
++    //           weight: 5,
++    //           color: '#ff0000',
++    //           dashArray: '',
++    //           fillOpacity: 0.7
++    //       });
++    //       if (!L.Browser.ie && !L.Browser.opera && !L.Browser.edge) {
++    //           layer.bringToFront();
++    //       }
++    //       info.update(layer.feature.properties);
++    //   }
++
++    //   // マウスアウト:ポリゴン情報の非表示
++    //   function resetHighlight(e) {
++    //       geoJSON.resetStyle(e.target);
++    //       info.update();
++    //   }
++
++    //   // 凡例の表示
++    //   var info = L.control();
++    //   info.onAdd = function () {
++    //       this._div = L.DomUtil.create('div', 'info');
++    //       this.update();
++    //       return this._div;
++    //   };
++    //   info.update = function (props) {
++    //       this._div.innerHTML = (props ? '<b>' + props.year + '</b><br />' + props.remarks : 'Field Info');
++    //   };
++    //   info.addTo(mymap);
++
++    //   // geoJSONをマップに表示
++    //   var geoJSON = L.geoJSON(geojson,{ onEachFeature: onEachFeature}).addTo(mymap)
++
++    //   // ポリゴンクリックで遷移
++    //   function moveGeoInfo() {
++    //     window.location.href ="http://127.0.0.1:8000/fieldinfo"
++    //   }
++    // },
+     pointControl: function(pointjson,mymap) {
+ 
+       // マウスオーバー関数
+@@ -123,19 +123,63 @@ export default {
+ 
+       // サークルアイコンの作成
+       function customCircleMarker (feature, latlng) {
++
+  let potassiumValue = feature['properties']["potassium"]
++
+         var geojsonMarkerOptions = {
+-            radius: 40,
+-            fillColor: "#fffc66",
+-            color: "#000",
+-            weight: 1,
+-            opacity: 1,
+-            fillOpacity: 0.8
+        radius: 40,
+        color: "#000",
+        weight: 1,
+        opacity: 1,
+        fillOpacity: 0.8
+      }
+      
+  if        ( potassiumValue < 8 )  { geojsonMarkerOptions['fillColor'] = "#56C1FF"
+  } else if ( potassiumValue < 15 ) { geojsonMarkerOptions['fillColor'] = "#73FDEA"
+  } else if ( potassiumValue < 30 ) { geojsonMarkerOptions['fillColor'] = "#FFFC66"
+  } else if ( potassiumValue < 50)  { geojsonMarkerOptions['fillColor'] = "#FF9300"
+  } else                            { geojsonMarkerOptions['fillColor'] = "#FF644E"
+         }
++
+         return L.circleMarker(latlng, geojsonMarkerOptions)
+       }
+ 
+-      
+       let geoJSON = L.geoJSON(pointjson,{ onEachFeature: onEachFeature, pointToLayer: customCircleMarker }).addTo(mymap)
+
+// for (var i = 0; i <pointjson["features"].length; i++) {
+  
+//   let lng = pointjson["features"][i]['geometry']['coordinates'][1]
+//   let lat = pointjson["features"][i]['geometry']['coordinates'][0]
++
+//   // L.circle([lng,lat], circleMarkerOptions()).addTo(mymap)
+//   L.circle([lng,lat], {radius: 50}).addTo(mymap)
+// }
++
+// function circleMarkerOptions() {
+//   let options = {
+//                   radius: 50,
+//                   fillColor: "#fffc66",
+//                   color: "#000",
+//                   weight: 1,
+//                   opacity: 1,
+//                   fillOpacity: 0.8
+//                 }
+//   return options
+// }
++
+// function getRadius(zoomLevel){
++
+//   if (zoomLevel < 15) {
+//     return 80
+//   } else {
+//     return 40
+//   }
+// }
++
+// let zoomlevel = mymap.on('zoom',function(e){
+//                 })
+// console.log(zoomlevel)
++
+     }
+ 
+   },
+diff --git a/frontend/src/views/HomeMap.vue b/frontend/src/views/HomeMap.vue
+index 75ab7cb..22f2e6d 100644
+--- a/frontend/src/views/HomeMap.vue
++++ b/frontend/src/views/HomeMap.vue
+@@ -1,35 +1,41 @@
+ <template>
++<div>
++  <div class="alert alert-danger m-0" v-show="apiError">
++    {{ apiError.message }}
++  </div>
+   <div :id="mapid"></div>
++</div>
+ </template>
+ 
+ <script>
+-import L from 'leaflet'
+-import 'leaflet/dist/leaflet.css'
+-delete  L.Icon.Default.prototype._getIconUrl
+ import MapDrow from '../mixins/MapDrow'
+ 
+ export default {
++  data(){
++    return {
+apiError: false
++    }
++  },
+   mounted() {
+-    // プロパティ初期値定義
+-    let centerLatlng = [43.2121696, 143.2725181]
+-    let zoomLv = 15
+-    let mapInfo = true
++  // プロパティ初期値定義
++    var centerLatlng = [43.2121696, 143.2725181]
++    var zoomLv = 15
++    var mapInfo = true
+ 
+-    // MapDrowのbaseMapDrowメソッド
++  // MapDrowのbaseMapDrowメソッド
+     this.baseMapDrow(centerLatlng,zoomLv,mapInfo)
+ 
+-    // axiosでbackendからポリゴンデータを取得
+-    // response.dataをMapDrowの各メソッドに渡す
+-    this.axios
+-        .get("/api/v1/polygondata/")
+-        .then(response => (
+-            this.polygonControl(response.data,this.mymap)
+-      ))
++  // axiosでbackendからポリゴンデータを取得
++  // response.dataをMapDrowの各メソッドに渡す
++    // this.mymap -> MapDrowのmymap
++    // this.axios
++    //     .get("/api/v1/polygondata/")
++    //     .then( response => ( this.polygonControl(response.data,this.mymap)) )
++    //     .catch( error => this.apiError = error)
+     this.axios
+         .get("/api/v1/soildata/")
+-        .then(response => (
+-          this.pointControl(response.data,this.mymap)
+-      ))
+  .then( response => ( this.pointControl(response.data,this.mymap)) )
+  .catch( error => this.apiError = error)
+   },
+   mixins: [MapDrow]
+ }
+@@ -40,12 +46,5 @@ export default {
+   width: 100%;
+   height: 100vh;
+ }
+-.info {
+-  font-size: 16px;
+-  width: 120px;
+-  height: 60px;
+-  background: white;
+-  border-radius: 5px;
+-  opacity: 0.9;
+-}
++
+ </style>
+\ No newline at end of file
+diff --git a/frontend/webpack-stats.json b/frontend/webpack-stats.json
+index 1adb77d..2d6caee 100644
+--- a/frontend/webpack-stats.json
++++ b/frontend/webpack-stats.json
+@@ -1 +1 @@
+-{"status":"done","publicPath":"http://127.0.0.1:8080/","error":"ModuleError","message":"Module Error (from ./node_modules/eslint-loader/index.js):\n\n/app/src/views/HomeMap.vue\n  52:47  error  'mymap' is not defined  no-undef\n  57:43  error  'mymap' is not defined  no-undef\n\n✖ 2 problems (2 errors, 0 warnings)\n","chunks":{"app":[{"name":"bundle.js","publicPath":"http://127.0.0.1:8080/bundle.js","path":"/app/dist/bundle.js"},{"name":"app.e657f5ecaaf7158252d4.hot-update.js","publicPath":"http://127.0.0.1:8080/app.e657f5ecaaf7158252d4.hot-update.js","path":"/app/dist/app.e657f5ecaaf7158252d4.hot-update.js"}]}}
+\ No newline at end of file
++{"status":"done","publicPath":"http://127.0.0.1:8080/","error":"ModuleError","message":"Module Error (from ./node_modules/eslint-loader/index.js):\n\n/app/src/mixins/MapDrow.js\n  20:13  error  't_ort' is assigned a value but never used  no-unused-vars\n\n✖ 1 problem (1 error, 0 warnings)\n","chunks":{"app":[{"name":"bundle.js","publicPath":"http://127.0.0.1:8080/bundle.js","path":"/app/dist/bundle.js"},{"name":"app.ee4e196256f49ef6eccd.hot-update.js","publicPath":"http://127.0.0.1:8080/app.ee4e196256f49ef6eccd.hot-update.js","path":"/app/dist/app.ee4e196256f49ef6eccd.hot-update.js"}]}}
+\ No newline at end of file
+
+commit ff2bd3195fde89b39ca4df394815d53926a82cb4
+Merge: a827cbd 6b4e9fe
+Author: M.Goto <sindicum@icloud.com>
+Date:   Sun May 30 18:02:22 2021 +0900
+
+    merge local repo
