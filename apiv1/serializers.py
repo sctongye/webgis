@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from rest_framework_gis.serializers import GeoFeatureModelSerializer
 from backend.models import PolygonData,OwnerData,CropCode,SoilData
+from .modules import serializers_module
 
 
 class PolygonDataSerializer(GeoFeatureModelSerializer):
@@ -26,22 +27,34 @@ class CropCodeSerializer(serializers.ModelSerializer):
         model = CropCode
         fields = '__all__'
 
-
-# class PointDataSerializer(GeoFeatureModelSerializer):
-
-#     class Meta:
-#         model = PointData
-#         fields = '__all__'
-#         geo_field = 'point'
-
-
 class SoilDataSerializer(GeoFeatureModelSerializer):
 
-    # point,date,nitrogen,phosphoric_acid,potassium,magnesium,calsium
-
-    # point = PointDataSerializer()
+    phosphoric_acid_rate = serializers.SerializerMethodField()
+    potassium_rate = serializers.SerializerMethodField()
+    magnesium_rate = serializers.SerializerMethodField()
 
     class Meta:
         model = SoilData
-        fields = '__all__'
+        fields = [
+            'id',
+            'date',
+            'ph',
+            'nitrogen',
+            'phosphoric_acid',
+            'potassium',
+            'magnesium',
+            'calsium',
+            'phosphoric_acid_rate',
+            'potassium_rate',
+            'magnesium_rate',
+            ]
         geo_field = 'point'
+
+    def get_phosphoric_acid_rate(self,obj):
+        return serializers_module.result_P_rate(obj.phosphoric_acid)
+
+    def get_potassium_rate(self,obj):
+        return serializers_module.result_K_rate(obj.potassium)
+
+    def get_magnesium_rate(self,obj):
+        return serializers_module.result_Mg_rate(obj.magnesium)

@@ -3,7 +3,7 @@
   <div class="alert alert-danger m-0" v-show="apiError">
     {{ apiError.message }}
   </div>
-  <div :id="mapid"></div>
+  <div :id="mainmapid"></div>
 </div>
 </template>
 
@@ -19,7 +19,7 @@ import 'leaflet.markercluster'
 export default {
   data(){
     return {
-      mapid: "mainmap",
+      mainmapid: "mainmap",
       apiError: false,
       centerLatlng: [43.2121696, 143.2725181],
       zoomLv: 15,
@@ -45,7 +45,7 @@ export default {
     })
 
     // 地図表示
-    let mymap = L.map( this.mapid , { center: L.latLng(this.centerLatlng), zoom: this.zoomLv,zoominfoControl: true,layers: [OSM] } )
+    let mymap = L.map( this.mainmapid , { center: L.latLng(this.centerLatlng), zoom: this.zoomLv,zoominfoControl: true,layers: [OSM] } )
 
     // 地図補足表示
       const baseMaps = {'マップ（OSM）': OSM,'航空写真（地理院）': GIA, '航空写真（GoogleMap）': GMS };
@@ -67,6 +67,23 @@ export default {
   methods: {
     pointControl: function(pointjson,mymap) {
 
+      let pointColor = {
+        1: "#56C1FF",
+        2: "#73FDEA",
+        3: "#FFFC66",
+        4: "#FF9300",
+        5: "#FF644E",
+        6: "#CB297B"
+      }
+
+      let geojsonMarkerOptions = {
+        radius: 15,
+        color: "#000",
+        weight: 1,
+        opacity: 1,
+        fillOpacity: 0.7
+      }
+
       // マウスイベント制御
       function onEachFeature(feature, layer) {
         layer.on({
@@ -80,64 +97,63 @@ export default {
           var layer = e.target;
           layer.setStyle({
             radius: 15,
-            fillColor: "#ff0000",
+            // fillColor: "#ff0000",
             color: "#ff0000",
-            weight: 1,
-            opacity: 1,
-            fillOpacity: 0.8
+            weight: 2,
+            fillOpacity: 1
           });
           if (!L.Browser.ie && !L.Browser.opera && !L.Browser.edge) {
               layer.bringToFront();
           }
-          info.update(layer.feature.properties)
+          // info.update(layer.feature.properties)
+          let popUpInfo = '<div>pH' + layer.feature.properties.ph + '</div>' +
+              '<div>熱水抽出窒素' + layer.feature.properties.nitrogen + '</div>' +
+              '<div>有効態リン酸' + layer.feature.properties.phosphoric_acid + '</div>' +
+              '<div>交換性カリ' + layer.feature.properties.potassium + '</div>' +
+              '<div>交換性苦土' + layer.feature.properties.magnesium + '</div>'
+
+          layer.bindPopup(popUpInfo).openPopup()
       }
 
       // マウスアウト
       function resetHighlight(e) {
           pointJSON_K.resetStyle(e.target);
           pointJSON_P.resetStyle(e.target);
-          info.update()
+          // info.update()
+          mymap.closePopup()
       }
 
 
-      // 凡例の表示
-      var info = L.control({position: 'bottomleft'});
-      info.onAdd = function () {
-          this._div = L.DomUtil.create('div', 'pointinfo');
-          this.update();
-          return this._div;
-      };
-      info.update = function (props) {
-        console.log(props)
-          this._div.innerHTML = (props
-            ? '<div>pH' + props.ph + '</div>' +
-              '<div>熱水抽出窒素' + props.nitrogen + '</div>' +
-              '<div>有効態リン酸' + props.phosphoric_acid + '</div>' +
-              '<div>交換性カリ' + props.potassium + '</div>' +
-              '<div>交換性苦土' + props.magnesium + '</div>'
-            : '土壌分析結果情報'
-          );
-      };
-      info.addTo(mymap);
+      // // 凡例の表示
+      // var info = L.control({position: 'bottomleft'});
+      // info.onAdd = function () {
+      //     this._div = L.DomUtil.create('div', 'pointinfo');
+      //     this.update();
+      //     return this._div;
+      // };
+      // info.update = function (props) {
+      //   // console.log(props)
+      //     this._div.innerHTML = (props
+      //       ? '<div>pH' + props.ph + '</div>' +
+      //         '<div>熱水抽出窒素' + props.nitrogen + '</div>' +
+      //         '<div>有効態リン酸' + props.phosphoric_acid + '</div>' +
+      //         '<div>交換性カリ' + props.potassium + '</div>' +
+      //         '<div>交換性苦土' + props.magnesium + '</div>'
+      //       : '土壌分析結果情報'
+      //     );
+      // };
+      // info.addTo(mymap);
 
       // サークルアイコンの作成（リン酸）
       function customCircleMarkerP (feature, latlng) {
 
-        let phosphoricAcidValue = feature['properties']["phosphoric_acid"]
-
-        let geojsonMarkerOptions = {
-              radius: 15,
-              color: "#000",
-              weight: 1,
-              opacity: 1,
-              fillOpacity: 0.8
-            }
+        let rate = feature['properties']["phosphoric_acid_rate"]
             
-        if      ( phosphoricAcidValue < 5  ) { geojsonMarkerOptions['fillColor'] = "#56C1FF"}
-        else if ( phosphoricAcidValue < 10 ) { geojsonMarkerOptions['fillColor'] = "#73FDEA"}
-        else if ( phosphoricAcidValue < 30 ) { geojsonMarkerOptions['fillColor'] = "#FFFC66"}
-        else if ( phosphoricAcidValue < 60 ) { geojsonMarkerOptions['fillColor'] = "#FF9300"}
-        else                                 { geojsonMarkerOptions['fillColor'] = "#FF644E"}
+        if      ( rate === 1 ) { geojsonMarkerOptions['fillColor'] = pointColor[1]}
+        else if ( rate === 2 ) { geojsonMarkerOptions['fillColor'] = pointColor[2]}
+        else if ( rate === 3 ) { geojsonMarkerOptions['fillColor'] = pointColor[3]}
+        else if ( rate === 4 ) { geojsonMarkerOptions['fillColor'] = pointColor[4]}
+        else                   { geojsonMarkerOptions['fillColor'] = pointColor[5]}
 
         return L.circleMarker(latlng, geojsonMarkerOptions)
       }
@@ -145,30 +161,37 @@ export default {
       // サークルアイコンの作成（加里）
       function customCircleMarkerK (feature, latlng) {
 
-        let potassiumValue = feature['properties']["potassium"]
-
-        let geojsonMarkerOptions = {
-              radius: 15,
-              color: "#000",
-              weight: 1,
-              opacity: 1,
-              fillOpacity: 0.8
-            }
+        let rate = feature['properties']["potassium_rate"]
             
-        if      ( potassiumValue < 8  ) { geojsonMarkerOptions['fillColor'] = "#56C1FF"}
-        else if ( potassiumValue < 15 ) { geojsonMarkerOptions['fillColor'] = "#73FDEA"}
-        else if ( potassiumValue < 30 ) { geojsonMarkerOptions['fillColor'] = "#FFFC66"}
-        else if ( potassiumValue < 50 ) { geojsonMarkerOptions['fillColor'] = "#FF9300"}
-        else                            { geojsonMarkerOptions['fillColor'] = "#FF644E"}
+        if      ( rate === 1 ) { geojsonMarkerOptions['fillColor'] = pointColor[1]}
+        else if ( rate === 2 ) { geojsonMarkerOptions['fillColor'] = pointColor[2]}
+        else if ( rate === 3 ) { geojsonMarkerOptions['fillColor'] = pointColor[3]}
+        else if ( rate === 4 ) { geojsonMarkerOptions['fillColor'] = pointColor[4]}
+        else if ( rate === 5 ) { geojsonMarkerOptions['fillColor'] = pointColor[5]}
+        else                   { geojsonMarkerOptions['fillColor'] = pointColor[6]}
+
+        return L.circleMarker(latlng, geojsonMarkerOptions)
+      }
+
+      // サークルアイコンの作成（苦土）
+      function customCircleMarkerMg (feature, latlng) {
+
+        let rate = feature['properties']["magnesium_rate"]
+            
+        if      ( rate === 1 ) { geojsonMarkerOptions['fillColor'] = pointColor[1]}
+        else if ( rate === 2 ) { geojsonMarkerOptions['fillColor'] = pointColor[2]}
+        else if ( rate === 3 ) { geojsonMarkerOptions['fillColor'] = pointColor[3]}
+        else                   { geojsonMarkerOptions['fillColor'] = pointColor[5]}
 
         return L.circleMarker(latlng, geojsonMarkerOptions)
       }
 
       // pointジオメトリの描画
-      let pointJSON_K = L.geoJSON(pointjson,{ onEachFeature: onEachFeature, pointToLayer: customCircleMarkerK }).addTo(mymap)
       let pointJSON_P = L.geoJSON(pointjson,{ onEachFeature: onEachFeature, pointToLayer: customCircleMarkerP }).addTo(mymap)
+      let pointJSON_K = L.geoJSON(pointjson,{ onEachFeature: onEachFeature, pointToLayer: customCircleMarkerK }).addTo(mymap)
+      let pointJSON_Mg = L.geoJSON(pointjson,{ onEachFeature: onEachFeature, pointToLayer: customCircleMarkerMg }).addTo(mymap)
 
-      const soilStatus = {'有効態リン酸': pointJSON_K,'交換性カリ': pointJSON_P};
+      const soilStatus = {'有効態リン酸': pointJSON_P,'交換性カリ': pointJSON_K,'交換性苦土': pointJSON_Mg};
       L.control.layers(soilStatus, null,{collapsed: false}).addTo(mymap);
 
       // マーカークラスタの作成・表示
@@ -196,14 +219,14 @@ export default {
 
 
       // zoomレベルの確認
-      mymap.on('move',function(){
-        output(mymap)
-      })
+      // mymap.on('move',function(){
+      //   output(mymap)
+      // })
 
-      function output(map) {
-        var zoom = map.getZoom()
-         console.log(zoom)
-      }
+      // function output(map) {
+      //   var zoom = map.getZoom()
+      //    console.log(zoom)
+      // }
 
     },
     polygonControl: function(polyjson,mymap) {
