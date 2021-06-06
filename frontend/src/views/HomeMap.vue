@@ -23,6 +23,7 @@ export default {
       apiError: false,
       centerLatlng: [43.2121696, 143.2725181],
       zoomLv: 15,
+      analysisItem: "P"
     }
   },
   mounted() {
@@ -74,11 +75,21 @@ export default {
       })
 
       // 地図表示
-      let mymap = L.map( this.mapid , { center: L.latLng(this.centerLatlng), zoom: this.zoomLv,zoominfoControl: true,layers: [OSM] } )
+      let mymap = L.map( this.mapid , {
+              center: L.latLng(this.centerLatlng),
+              zoom: this.zoomLv,
+              zoominfoControl: true,
+              layers: [OSM]
+            } )
 
       // 地図補足表示
 
-      const pointJSON = this.pointControl(soildata).addTo(mymap)
+      // pointジオメトリの描画
+      let pointJSON = L.geoJSON(soildata,{
+                        onEachFeature: this.onEachFeatrue,
+                        pointToLayer: this.customCircleMarker,
+                      }).addTo(mymap)
+
       const polyJSON = this.polygonControl(polydata,mymap).addTo(mymap)
 
       const baseMaps = {'マップ（OSM）': OSM,'航空写真（地理院）': GIA, '航空写真（GoogleMap）': GMS };
@@ -98,15 +109,11 @@ export default {
       L.control.scale({imperial: false,maxWidth: 300}).addTo(mymap);
       this.makeLegend(mymap)
     },
-    // pointControlメソッド
-    pointControl: function(pointjson) {
-
     // const map = mymap
-    function onEachFeature(feature, layer) {
+    onEachFeatrue: function(feature, layer) {
         layer.on("mouseover",function(e){
           var targetlayer = e.target
           targetlayer.setStyle({
-            radius: 15,
             color: "#ff0000",
             weight: 2,
             fillOpacity: 1
@@ -123,49 +130,20 @@ export default {
           layer.bindPopup(popUpInfo).openPopup()
         });
         layer.on("mouseout",function(e){
-          pointJSON.resetStyle(e.target);
+          var targetlayer = e.target
+          targetlayer.setStyle({
+            color: "#000",
+            weight: 1,
+            fillOpacity: 0.7
+          });
           layer.closePopup()
         });
-    }
-
-
-      // // マウスイベント制御
-      // function onEachFeature(feature, layer) {
-      //   layer.on({
-      //       mouseover: highlightFeature,
-      //       mouseout: resetHighlight,
-      //   });
-      // }
-
-      // // マウスオーバー
-      // function highlightFeature(e) {
-      //     var layer = e.target;
-      //     layer.setStyle({
-      //       radius: 15,
-      //       color: "#ff0000",
-      //       weight: 2,
-      //       fillOpacity: 1
-      //     });
-      //     if (!L.Browser.ie && !L.Browser.opera && !L.Browser.edge) {
-      //         layer.bringToFront();
-      //     }
-      //     let popUpInfo = '<div>pH' + layer.feature.properties.ph + '</div>' +
-      //         '<div>熱水抽出窒素' + layer.feature.properties.nitrogen + '</div>' +
-      //         '<div>有効態リン酸' + layer.feature.properties.phosphoric_acid + '</div>' +
-      //         '<div>交換性カリ' + layer.feature.properties.potassium + '</div>' +
-      //         '<div>交換性苦土' + layer.feature.properties.magnesium + '</div>'
-
-      //     layer.bindPopup(popUpInfo).openPopup()
-      // }
-
-      // // マウスアウト
-      // function resetHighlight(e) {
-      //     pointJSON.resetStyle(e.target);
-      //     mymap.closePopup()
-      // }
-
-      // サークルアイコンの作成（リン酸）
-      function customCircleMarker (geoJsonPoint, latlng) {
+    },
+    // pointControlメソッド
+    customCircleMarker: function(geoJsonPoint, latlng) {
+      
+      let item = this.analysisItem
+      console.log(item)
 
         let pointColor = {
           1: "#56C1FF",
@@ -193,7 +171,8 @@ export default {
         else                   { geojsonMarkerOptions['fillColor'] = pointColor[5]}
 
         return L.circleMarker(latlng, geojsonMarkerOptions)
-      }
+      },
+
 
       // // サークルアイコンの作成（加里）
       // function customCircleMarkerK (feature, latlng) {
@@ -223,11 +202,7 @@ export default {
       //   return L.circleMarker(latlng, geojsonMarkerOptions)
       // }
 
-      // pointジオメトリの描画
-      let pointJSON = L.geoJSON(pointjson,{
-          onEachFeature: onEachFeature,
-          pointToLayer: customCircleMarker,
-        })
+
 
       // // マーカークラスタの作成・表示
       // var marker_P = L.markerClusterGroup({
@@ -248,8 +223,6 @@ export default {
       //     };
       // legend.addTo(mymap);
 
-      return pointJSON
-    },
     polygonControl: function(polyjson) {
 
       // マウスイベント制御
@@ -277,6 +250,7 @@ export default {
 
       // マウスアウト:ポリゴン情報の非表示
       function resetHighlight(e) {
+         console.log(polyJSON)
           polyJSON.resetStyle(e.target);
 
       }
@@ -294,11 +268,35 @@ export default {
     makeLegend: function(map){
       var legend = L.control({position: 'topright'});
       legend.onAdd = function () {
-        var div = L.DomUtil.create('div', 'class')
-        div.innerHTML = "<div><input type='button' value='ボタン' id='refreshButton'></input><div>"
+        var div = L.DomUtil.create('div', 'radio-button')
+        div.innerHTML =
+          '<div>' + 
+            '<label><input type="radio" name="item" value="P" />有効態リン酸</label></br>'+
+            '<label><input type="radio" name="item" value="K" />交換性カリ</label>'+
+            '<input id="btn" type="button" value="送信" />' +
+          '<div>'
         return div;
       };
-    legend.addTo(map);
+      legend.addTo(map);
+
+      document.addEventListener('DOMContentLoad', function() {
+        var getRadioValue = function(name)  {
+          var result = '';
+          var elems = document.getElementByName(name);
+          for (var i = 0, len = elems.length; i < len; i++) {
+            var elem = elem.item(i);
+            if (elem.checked) {
+              result = elem.value;
+              break;
+            }
+          }
+          return result;
+        };
+
+        document.getElementById('btn').addEventListener('click', function() {
+          console.log(getRadioValue)
+        },false)
+      })
     },
   },
 }
