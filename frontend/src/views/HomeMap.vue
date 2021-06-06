@@ -27,6 +27,7 @@ export default {
   },
   mounted() {
     this.putMapControll()
+    
   },
   methods: {
     getApiData: async function() {
@@ -77,126 +78,114 @@ export default {
 
       // 地図補足表示
 
-      // pointControllメソッドで各pointJSONを配列で得てレイヤーグループ化し、マップに追加
-      const pointControlP = this.pointControlP(soildata, mymap)
-      const pointControlK = this.pointControlK(soildata, mymap)
-      const pointControlMg = this.pointControlMg(soildata, mymap)
-    
-      const pointJSON = L.featureGroup([pointControlP,pointControlK,pointControlMg]).addTo(mymap)
-      /////////////////////////////////////////////////////////////
-      
-      var markerP = L.markerClusterGroup({
-        showCoverageOnHover: false,
-        spiderfyOnMaxZoom: false,
-        removeOutsideVisibleBounds: true,
-        disableClusteringAtZoom: 16,
-        maxClusterRadius: 50
-      })
-      var markerK = L.markerClusterGroup({
-        showCoverageOnHover: false,
-        spiderfyOnMaxZoom: false,
-        removeOutsideVisibleBounds: true,
-        disableClusteringAtZoom: 16,
-        maxClusterRadius: 50
-      })
-      var markerMg = L.markerClusterGroup({
-        showCoverageOnHover: false,
-        spiderfyOnMaxZoom: false,
-        removeOutsideVisibleBounds: true,
-        disableClusteringAtZoom: 16,
-        maxClusterRadius: 50
-      })
-
-      mymap.addLayer(markerP.addLayer(pointControlP))
-      mymap.addLayer(markerK.addLayer(pointControlK))
-      mymap.addLayer(markerMg.addLayer(pointControlMg))
-
+      const pointJSON = this.pointControl(soildata).addTo(mymap)
       const polyJSON = this.polygonControl(polydata,mymap).addTo(mymap)
 
       const baseMaps = {'マップ（OSM）': OSM,'航空写真（地理院）': GIA, '航空写真（GoogleMap）': GMS };
       const geoLayer = {'圃場ポリゴン': polyJSON, '土壌分析地点': pointJSON}
       L.control.layers(baseMaps, geoLayer, {collapsed: false}).addTo(mymap);
 
-      const soilStatus = {'有効態リン酸': pointControlP,'交換性カリ':pointControlK,'交換性苦土': pointControlMg};
-      const legend = L.control.layers(soilStatus, null,{collapsed: false}).addTo(mymap)
+      const soilStatus = {'有効態リン酸': pointJSON,'交換性カリ': pointJSON};
+      // L.control.layers(soilStatus, null,{collapsed: false}).addTo(mymap)
+      let legend = L.control.layers(soilStatus, null,{collapsed: false}).addTo(mymap)
 
-      mymap.on({'overlayadd': (e) => { if (e.name === '土壌分析地点'){legend.addTo(mymap)} } })
-      mymap.on({'overlayremove': (e) => { if (e.name === '土壌分析地点') { legend.remove()} } })
-
-      // console.log(baseMaps.)
+      legend.addBaseLayer(pointJSON,'交換性苦土')
+      // legend.removeLayer(pointJSON)
+      // mymap.on({'overlayadd': (e) => { if (e.name === '土壌分析地点'){legend.addTo(mymap)} } })
+      // mymap.on({'overlayremove': (e) => { if (e.name === '土壌分析地点') { legend.remove()} } })
 
       // 左下にスケール表示
       L.control.scale({imperial: false,maxWidth: 300}).addTo(mymap);
+      this.makeLegend(mymap)
     },
     // pointControlメソッド
-    pointControl: function(pointjson,mymap) {
+    pointControl: function(pointjson) {
 
-
-
-      // マウスイベント制御
-      function onEachFeature(feature, layer) {
-        layer.on({
-            mouseover: highlightFeature,
-            mouseout: resetHighlight,
-        });
-      }
-
-      // マウスオーバー
-      function highlightFeature(e) {
-          var layer = e.target;
-          layer.setStyle({
+    // const map = mymap
+    function onEachFeature(feature, layer) {
+        layer.on("mouseover",function(e){
+          var targetlayer = e.target
+          targetlayer.setStyle({
             radius: 15,
             color: "#ff0000",
             weight: 2,
             fillOpacity: 1
           });
           if (!L.Browser.ie && !L.Browser.opera && !L.Browser.edge) {
-              layer.bringToFront();
+              targetlayer.bringToFront()
           }
-          // info.update(layer.feature.properties)
-          let popUpInfo = '<div>pH' + layer.feature.properties.ph + '</div>' +
-              '<div>熱水抽出窒素' + layer.feature.properties.nitrogen + '</div>' +
-              '<div>有効態リン酸' + layer.feature.properties.phosphoric_acid + '</div>' +
-              '<div>交換性カリ' + layer.feature.properties.potassium + '</div>' +
-              '<div>交換性苦土' + layer.feature.properties.magnesium + '</div>'
-
+          let popUpInfo =
+            '<div>pH' + targetlayer.feature.properties.ph + '</div>' +
+            '<div>熱水抽出窒素' + targetlayer.feature.properties.nitrogen + '</div>' +
+            '<div>有効態リン酸' + targetlayer.feature.properties.phosphoric_acid + '</div>' +
+            '<div>交換性カリ' + targetlayer.feature.properties.potassium + '</div>' +
+            '<div>交換性苦土' + targetlayer.feature.properties.magnesium + '</div>'
           layer.bindPopup(popUpInfo).openPopup()
-      }
-
-      // マウスアウト
-      function resetHighlight(e) {
-          pointJSON_P.resetStyle(e.target);
-          // pointJSON_P.resetStyle(e.target);
-          // info.update()
-          mymap.closePopup()
-      }
+        });
+        layer.on("mouseout",function(e){
+          pointJSON.resetStyle(e.target);
+          layer.closePopup()
+        });
+    }
 
 
+      // // マウスイベント制御
+      // function onEachFeature(feature, layer) {
+      //   layer.on({
+      //       mouseover: highlightFeature,
+      //       mouseout: resetHighlight,
+      //   });
+      // }
 
-      let pointColor = {
-        1: "#56C1FF",
-        2: "#73FDEA",
-        3: "#FFFC66",
-        4: "#FF9300",
-        5: "#FF644E",
-        6: "#CB297B"
-      }
+      // // マウスオーバー
+      // function highlightFeature(e) {
+      //     var layer = e.target;
+      //     layer.setStyle({
+      //       radius: 15,
+      //       color: "#ff0000",
+      //       weight: 2,
+      //       fillOpacity: 1
+      //     });
+      //     if (!L.Browser.ie && !L.Browser.opera && !L.Browser.edge) {
+      //         layer.bringToFront();
+      //     }
+      //     let popUpInfo = '<div>pH' + layer.feature.properties.ph + '</div>' +
+      //         '<div>熱水抽出窒素' + layer.feature.properties.nitrogen + '</div>' +
+      //         '<div>有効態リン酸' + layer.feature.properties.phosphoric_acid + '</div>' +
+      //         '<div>交換性カリ' + layer.feature.properties.potassium + '</div>' +
+      //         '<div>交換性苦土' + layer.feature.properties.magnesium + '</div>'
 
-      let geojsonMarkerOptions = {
-        radius: 15,
-        color: "#000",
-        weight: 1,
-        opacity: 1,
-        fillOpacity: 0.7
-      }
+      //     layer.bindPopup(popUpInfo).openPopup()
+      // }
 
-
+      // // マウスアウト
+      // function resetHighlight(e) {
+      //     pointJSON.resetStyle(e.target);
+      //     mymap.closePopup()
+      // }
 
       // サークルアイコンの作成（リン酸）
-      function customCircleMarkerP (feature, latlng) {
+      function customCircleMarker (geoJsonPoint, latlng) {
 
-        let rate = feature['properties']["phosphoric_acid_rate"]
-            
+        let pointColor = {
+          1: "#56C1FF",
+          2: "#73FDEA",
+          3: "#FFFC66",
+          4: "#FF9300",
+          5: "#FF644E",
+          6: "#CB297B"
+        }
+
+        let geojsonMarkerOptions = {
+          radius: 15,
+          color: "#000",
+          weight: 1,
+          opacity: 1,
+          fillOpacity: 0.7
+        }
+
+        let rate = geoJsonPoint['properties']["phosphoric_acid_rate"]
+              
         if      ( rate === 1 ) { geojsonMarkerOptions['fillColor'] = pointColor[1]}
         else if ( rate === 2 ) { geojsonMarkerOptions['fillColor'] = pointColor[2]}
         else if ( rate === 3 ) { geojsonMarkerOptions['fillColor'] = pointColor[3]}
@@ -206,38 +195,39 @@ export default {
         return L.circleMarker(latlng, geojsonMarkerOptions)
       }
 
-      // サークルアイコンの作成（加里）
-      function customCircleMarkerK (feature, latlng) {
+      // // サークルアイコンの作成（加里）
+      // function customCircleMarkerK (feature, latlng) {
 
-        let rate = feature['properties']["potassium_rate"]
+      //   let rate = feature['properties']["potassium_rate"]
             
-        if      ( rate === 1 ) { geojsonMarkerOptions['fillColor'] = pointColor[1]}
-        else if ( rate === 2 ) { geojsonMarkerOptions['fillColor'] = pointColor[2]}
-        else if ( rate === 3 ) { geojsonMarkerOptions['fillColor'] = pointColor[3]}
-        else if ( rate === 4 ) { geojsonMarkerOptions['fillColor'] = pointColor[4]}
-        else if ( rate === 5 ) { geojsonMarkerOptions['fillColor'] = pointColor[5]}
-        else                   { geojsonMarkerOptions['fillColor'] = pointColor[6]}
+      //   if      ( rate === 1 ) { geojsonMarkerOptions['fillColor'] = pointColor[1]}
+      //   else if ( rate === 2 ) { geojsonMarkerOptions['fillColor'] = pointColor[2]}
+      //   else if ( rate === 3 ) { geojsonMarkerOptions['fillColor'] = pointColor[3]}
+      //   else if ( rate === 4 ) { geojsonMarkerOptions['fillColor'] = pointColor[4]}
+      //   else if ( rate === 5 ) { geojsonMarkerOptions['fillColor'] = pointColor[5]}
+      //   else                   { geojsonMarkerOptions['fillColor'] = pointColor[6]}
 
-        return L.circleMarker(latlng, geojsonMarkerOptions)
-      }
+      //   return L.circleMarker(latlng, geojsonMarkerOptions)
+      // }
 
-      // サークルアイコンの作成（苦土）
-      function customCircleMarkerMg (feature, latlng) {
+      // // サークルアイコンの作成（苦土）
+      // function customCircleMarkerMg (feature, latlng) {
 
-        let rate = feature['properties']["magnesium_rate"]
+      //   let rate = feature['properties']["magnesium_rate"]
             
-        if      ( rate === 1 ) { geojsonMarkerOptions['fillColor'] = pointColor[1]}
-        else if ( rate === 2 ) { geojsonMarkerOptions['fillColor'] = pointColor[2]}
-        else if ( rate === 3 ) { geojsonMarkerOptions['fillColor'] = pointColor[3]}
-        else                   { geojsonMarkerOptions['fillColor'] = pointColor[5]}
+      //   if      ( rate === 1 ) { geojsonMarkerOptions['fillColor'] = pointColor[1]}
+      //   else if ( rate === 2 ) { geojsonMarkerOptions['fillColor'] = pointColor[2]}
+      //   else if ( rate === 3 ) { geojsonMarkerOptions['fillColor'] = pointColor[3]}
+      //   else                   { geojsonMarkerOptions['fillColor'] = pointColor[5]}
 
-        return L.circleMarker(latlng, geojsonMarkerOptions)
-      }
+      //   return L.circleMarker(latlng, geojsonMarkerOptions)
+      // }
 
       // pointジオメトリの描画
-      let pointJSON_P = L.geoJSON(pointjson,{ onEachFeature: onEachFeature, pointToLayer: customCircleMarkerP })
-      let pointJSON_K = L.geoJSON(pointjson,{ onEachFeature: onEachFeature, pointToLayer: customCircleMarkerK })
-      let pointJSON_Mg = L.geoJSON(pointjson,{ onEachFeature: onEachFeature, pointToLayer: customCircleMarkerMg })
+      let pointJSON = L.geoJSON(pointjson,{
+          onEachFeature: onEachFeature,
+          pointToLayer: customCircleMarker,
+        })
 
       // // マーカークラスタの作成・表示
       // var marker_P = L.markerClusterGroup({
@@ -248,250 +238,17 @@ export default {
       //   maxClusterRadius: 50
       // })
 
-      // var marker_K = L.markerClusterGroup({
-      //   showCoverageOnHover: false,
-      //   spiderfyOnMaxZoom: false,
-      //   removeOutsideVisibleBounds: true,
-      //   disableClusteringAtZoom: 16,
-      //   maxClusterRadius: 50
-      // })
-
-      // var marker_Mg = L.markerClusterGroup({
-      //   showCoverageOnHover: false,
-      //   spiderfyOnMaxZoom: false,
-      //   removeOutsideVisibleBounds: true,
-      //   disableClusteringAtZoom: 16,
-      //   maxClusterRadius: 50
-      // })
-
       // mymap.addLayer(marker_P.addLayer(pointJSON_P))
-      // mymap.addLayer(marker_K.addLayer(pointJSON_K))
-      // mymap.addLayer(marker_Mg.addLayer(pointJSON_Mg))
 
-      return [pointJSON_P, pointJSON_K, pointJSON_Mg]
-    },
-    // pointControlメソッド
-    pointControlP: function(pointjson,mymap) {
+      // var legend = L.control({position: 'bottomright'});
+      // legend.onAdd = function () {
+      //         var div = L.DomUtil.create('div', 'class')
+      //         div.innerHTML = "<div>aaa</div>"
+      //         return div;
+      //     };
+      // legend.addTo(mymap);
 
-      // マウスイベント制御
-      function onEachFeature(feature, layer) {
-        layer.on({
-            mouseover: highlightFeature,
-            mouseout: resetHighlight,
-        });
-      }
-
-      // マウスオーバー
-      function highlightFeature(e) {
-          var layer = e.target;
-          layer.setStyle({
-            radius: 15,
-            color: "#ff0000",
-            weight: 2,
-            fillOpacity: 1
-          });
-          if (!L.Browser.ie && !L.Browser.opera && !L.Browser.edge) {
-              layer.bringToFront();
-          }
-          // info.update(layer.feature.properties)
-          let popUpInfo = '<div>pH' + layer.feature.properties.ph + '</div>' +
-              '<div>熱水抽出窒素' + layer.feature.properties.nitrogen + '</div>' +
-              '<div>有効態リン酸' + layer.feature.properties.phosphoric_acid + '</div>' +
-              '<div>交換性カリ' + layer.feature.properties.potassium + '</div>' +
-              '<div>交換性苦土' + layer.feature.properties.magnesium + '</div>'
-
-          layer.bindPopup(popUpInfo).openPopup()
-      }
-
-      // マウスアウト
-      function resetHighlight(e) {
-          pointJSON_P.resetStyle(e.target);
-          mymap.closePopup()
-      }
-
-      let pointColor = {
-        1: "#56C1FF",
-        2: "#73FDEA",
-        3: "#FFFC66",
-        4: "#FF9300",
-        5: "#FF644E",
-        6: "#CB297B"
-      }
-
-      let geojsonMarkerOptions = {
-        radius: 15,
-        color: "#000",
-        weight: 1,
-        opacity: 1,
-        fillOpacity: 0.7
-      }
-
-      // サークルアイコンの作成（リン酸）
-      function customCircleMarkerP (feature, latlng) {
-
-        let rate = feature['properties']["phosphoric_acid_rate"]
-            
-        if      ( rate === 1 ) { geojsonMarkerOptions['fillColor'] = pointColor[1]}
-        else if ( rate === 2 ) { geojsonMarkerOptions['fillColor'] = pointColor[2]}
-        else if ( rate === 3 ) { geojsonMarkerOptions['fillColor'] = pointColor[3]}
-        else if ( rate === 4 ) { geojsonMarkerOptions['fillColor'] = pointColor[4]}
-        else                   { geojsonMarkerOptions['fillColor'] = pointColor[5]}
-
-        return L.circleMarker(latlng, geojsonMarkerOptions)
-      }
-
-      // pointジオメトリの描画
-      let pointJSON_P = L.geoJSON(pointjson,{ onEachFeature: onEachFeature, pointToLayer: customCircleMarkerP })
-
-      return pointJSON_P
-    },
-    pointControlK: function(pointjson,mymap) {
-
-      // マウスイベント制御
-      function onEachFeature(feature, layer) {
-        layer.on({
-            mouseover: highlightFeature,
-            mouseout: resetHighlight,
-        });
-      }
-
-      // マウスオーバー
-      function highlightFeature(e) {
-          var layer = e.target;
-          layer.setStyle({
-            radius: 15,
-            color: "#ff0000",
-            weight: 2,
-            fillOpacity: 1
-          });
-          if (!L.Browser.ie && !L.Browser.opera && !L.Browser.edge) {
-              layer.bringToFront();
-          }
-          // info.update(layer.feature.properties)
-          let popUpInfo = '<div>pH' + layer.feature.properties.ph + '</div>' +
-              '<div>熱水抽出窒素' + layer.feature.properties.nitrogen + '</div>' +
-              '<div>有効態リン酸' + layer.feature.properties.phosphoric_acid + '</div>' +
-              '<div>交換性カリ' + layer.feature.properties.potassium + '</div>' +
-              '<div>交換性苦土' + layer.feature.properties.magnesium + '</div>'
-
-          layer.bindPopup(popUpInfo).openPopup()
-      }
-
-      // マウスアウト
-      function resetHighlight(e) {
-          pointJSON_K.resetStyle(e.target);
-          mymap.closePopup()
-      }
-
-      let pointColor = {
-        1: "#56C1FF",
-        2: "#73FDEA",
-        3: "#FFFC66",
-        4: "#FF9300",
-        5: "#FF644E",
-        6: "#CB297B"
-      }
-
-      let geojsonMarkerOptions = {
-        radius: 15,
-        color: "#000",
-        weight: 1,
-        opacity: 1,
-        fillOpacity: 0.7
-      }
-
-      // サークルアイコンの作成（加里）
-      function customCircleMarkerK (feature, latlng) {
-
-        let rate = feature['properties']["potassium_rate"]
-            
-        if      ( rate === 1 ) { geojsonMarkerOptions['fillColor'] = pointColor[1]}
-        else if ( rate === 2 ) { geojsonMarkerOptions['fillColor'] = pointColor[2]}
-        else if ( rate === 3 ) { geojsonMarkerOptions['fillColor'] = pointColor[3]}
-        else if ( rate === 4 ) { geojsonMarkerOptions['fillColor'] = pointColor[4]}
-        else if ( rate === 5 ) { geojsonMarkerOptions['fillColor'] = pointColor[5]}
-        else                   { geojsonMarkerOptions['fillColor'] = pointColor[6]}
-
-        return L.circleMarker(latlng, geojsonMarkerOptions)
-      }
-
-      // pointジオメトリの描画
-      let pointJSON_K = L.geoJSON(pointjson,{ onEachFeature: onEachFeature, pointToLayer: customCircleMarkerK })
-
-      return pointJSON_K
-    },
-    pointControlMg: function(pointjson,mymap) {
-
-      // マウスイベント制御
-      function onEachFeature(feature, layer) {
-        layer.on({
-            mouseover: highlightFeature,
-            mouseout: resetHighlight,
-        });
-      }
-
-      // マウスオーバー
-      function highlightFeature(e) {
-          var layer = e.target;
-          layer.setStyle({
-            radius: 15,
-            color: "#ff0000",
-            weight: 2,
-            fillOpacity: 1
-          });
-          if (!L.Browser.ie && !L.Browser.opera && !L.Browser.edge) {
-              layer.bringToFront();
-          }
-          // info.update(layer.feature.properties)
-          let popUpInfo = '<div>pH' + layer.feature.properties.ph + '</div>' +
-              '<div>熱水抽出窒素' + layer.feature.properties.nitrogen + '</div>' +
-              '<div>有効態リン酸' + layer.feature.properties.phosphoric_acid + '</div>' +
-              '<div>交換性カリ' + layer.feature.properties.potassium + '</div>' +
-              '<div>交換性苦土' + layer.feature.properties.magnesium + '</div>'
-
-          layer.bindPopup(popUpInfo).openPopup()
-      }
-
-      // マウスアウト
-      function resetHighlight(e) {
-          pointJSON_Mg.resetStyle(e.target);
-          mymap.closePopup()
-      }
-
-      let pointColor = {
-        1: "#56C1FF",
-        2: "#73FDEA",
-        3: "#FFFC66",
-        4: "#FF9300",
-        5: "#FF644E",
-        6: "#CB297B"
-      }
-
-      let geojsonMarkerOptions = {
-        radius: 15,
-        color: "#000",
-        weight: 1,
-        opacity: 1,
-        fillOpacity: 0.7
-      }
-
-      // サークルアイコンの作成（苦土）
-      function customCircleMarkerMg (feature, latlng) {
-
-        let rate = feature['properties']["magnesium_rate"]
-            
-        if      ( rate === 1 ) { geojsonMarkerOptions['fillColor'] = pointColor[1]}
-        else if ( rate === 2 ) { geojsonMarkerOptions['fillColor'] = pointColor[2]}
-        else if ( rate === 3 ) { geojsonMarkerOptions['fillColor'] = pointColor[3]}
-        else                   { geojsonMarkerOptions['fillColor'] = pointColor[5]}
-
-        return L.circleMarker(latlng, geojsonMarkerOptions)
-      }
-
-      // pointジオメトリの描画
-      let pointJSON_Mg = L.geoJSON(pointjson,{ onEachFeature: onEachFeature, pointToLayer: customCircleMarkerMg })
-
-      return pointJSON_Mg
+      return pointJSON
     },
     polygonControl: function(polyjson) {
 
@@ -533,6 +290,15 @@ export default {
       let polyJSON = L.geoJSON(polyjson,{ onEachFeature: onEachFeature})
 
       return polyJSON
+    },
+    makeLegend: function(map){
+      var legend = L.control({position: 'topright'});
+      legend.onAdd = function () {
+        var div = L.DomUtil.create('div', 'class')
+        div.innerHTML = "<div><input type='button' value='ボタン' id='refreshButton'></input><div>"
+        return div;
+      };
+    legend.addTo(map);
     },
   },
 }
