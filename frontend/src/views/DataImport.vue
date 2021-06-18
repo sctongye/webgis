@@ -56,8 +56,6 @@ export default {
         // vm.data = linesArr
       }
       reader.readAsText( file )
-
-
     }
   }
 }

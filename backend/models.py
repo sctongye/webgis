@@ -40,13 +40,14 @@ class SoilData(models.Model):
     class Meta:
         db_table = 'soil_data'
 
-    point = models.GeometryField(unique=True)
-    date = models.DateField()
-    ph = models.FloatField()
-    nitrogen = models.FloatField()
+    point           = models.GeometryField(unique=True)
+    date            = models.DateField()
+    field_name      = models.CharField(max_length=100,default="")
+    crop_name       = models.CharField(max_length=100,default="")
+    ph              = models.FloatField()
+    nitrogen        = models.FloatField()
     phosphoric_acid = models.FloatField()
-    potassium = models.FloatField()
-    magnesium = models.FloatField()
-    calsium = models.FloatField()
-    remarks =models.CharField(max_length=100)
-    
+    potassium       = models.FloatField()
+    magnesium       = models.FloatField()
+    calsium         = models.FloatField()
+    remarks         = models.CharField(max_length=100,default="")

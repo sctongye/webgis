@@ -250,7 +250,7 @@ export default {
 }
 </script>
 
-<style>
+<style scoped>
 #mainmap {
   width: 100%;
   height: 100vh;
@@ -287,4 +287,5 @@ export default {
 label {
   padding: 4px;
 }
+/*  */
 </style>

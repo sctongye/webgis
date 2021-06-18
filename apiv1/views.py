@@ -1,4 +1,5 @@
 from rest_framework import viewsets
+from django_filters import rest_framework as filters
 from backend.models import PolygonData,OwnerData,CropCode,SoilData
 from .serializers import PolygonDataSerializer,OwnerDataSerializer,CropCodeSerializer,SoilDataSerializer
 
@@ -30,4 +31,7 @@ class SoilDataViewSet(viewsets.ModelViewSet):
 
     queryset = SoilData.objects.all()
     serializer_class = SoilDataSerializer
+    # 作物名でのフィルタリング設定
+    filter_backends = [filters.DjangoFilterBackend]
+    filterset_fields = ['crop_name']
 
