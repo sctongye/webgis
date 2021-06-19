@@ -1,14 +1,35 @@
 <template>
-  <div class="row p-2">
-    <div v-bind:id="mapid" class="col-md-4 mapstyle"></div>
-      <div class="lead col-md-8">
-        <ul class="mb-0">
-          <li>{{ geojson['properties']['year'] }}</li>
-          <li>{{ geojson['properties']['remarks'] }}</li>
-          <li>{{ geojson['properties']['owner_id'] }}</li>
-          <li>{{ geojson['properties']['crop_id'] }}</li>
-        </ul>
+  <div class="col-sm-8">
+    <div class="card mt-4">
+      <div class="row g-0">
+        <div v-bind:id="mapid" class="mapstyle col-md-4"></div>
+        <div class="card-body col-md-4">
+          <table class="table table-striped">
+            <tbody>
+              <tr>
+                <td>氏名</td>
+                <td>{{ geojson['properties']['owner_id'] }}</td>
+              </tr>
+              <tr>
+                <td>年次</td>
+                <td>{{ geojson['properties']['year'] }}</td>
+              </tr>
+              <tr>
+                <td>作物名</td>
+                <td>{{ geojson['properties']['crop_id'] }}</td>
+              </tr>
+              <tr>
+                <td>メモ</td>
+                <td>{{ geojson['properties']['remarks'] }}</td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="float-end">
+            <button type="button" class="btn btn-outline-danger btn-sm">修正</button>
+          </div>
+        </div>
       </div>
+    </div>
   </div>
 </template>
 
@@ -49,7 +70,7 @@ export default {
 
 <style scoped>
 .mapstyle {
-  height: 200px;
-  width: 200px;
+  height: 250px;
+  width: 250px;
 }
 </style>

@@ -21,7 +21,6 @@ export default {
       mapid: "mainmap",
       apiError: false,
       centerLatlng: [43.2121696, 143.2725181],
-      zoomLv: 15,
     }
   },
   created() {
@@ -61,15 +60,18 @@ export default {
       let soildata = result.soildata
       let polydata = result.polydata
 
-      // タイルレイヤー定義 OpenStreetMap/地理院タイル/GoogleMapサテライト
+      // タイルレイヤー定義 OpenStreetMap/地理院タイル/GoogleMapサテライト/土壌インベントリー
       const OSM = new L.tileLayer(GC.OSM_URL, {attribution: GC.OSM_ATTRIBUTION});
       const GIA = new L.tileLayer(GC.GIA_URL, {attribution: GC.GIA_ATTRIBUTION});
       const GMS = new L.tileLayer(GC.GMS_URL);
+      const SIV = new L.tileLayer(GC.SIV_URL);
 
       // マップオブジェクトの生成
       let mymap = L.map( this.mapid , {
               center: L.latLng(this.centerLatlng),
-              zoom: this.zoomLv,
+              zoom: 15,
+              maxZoom: 18,
+              minZoom: 7,
               zoominfoControl: true,
               layers: [OSM]
             } )
@@ -88,6 +90,10 @@ export default {
       let overlaysTree = {
         label: '圃場情報',
         children:[
+          {
+            label: '土壌図',
+            layer: SIV.setOpacity(0.7)
+          },
           {
             label: '圃場ポリゴン',
             layer: this.polygonControl(polydata,mymap)

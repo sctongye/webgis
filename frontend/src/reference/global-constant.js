@@ -10,6 +10,9 @@ const GIA_ATTR = "<a href='http://www.gsi.go.jp/kikakuchousei/kikakuchousei40182
 const GMS_URL = 'https://mt1.google.com/vt/lyrs=s&x={x}&y={y}&z={z}';
 const GMS_ATTR = "";
 
+// 農研機構土壌インベントリー
+const SIV_URL = 'https://soil-inventory.dc.affrc.go.jp/tile/figure/{z}/{x}/{y}.png'
+const SIV_ATTR = ""
 
 export default({
                 OSM_URL,
@@ -17,5 +20,7 @@ export default({
                 GIA_URL,
                 GIA_ATTR,
                 GMS_URL,
-                GMS_ATTR
+                GMS_ATTR,
+                SIV_URL,
+                SIV_ATTR
               })
